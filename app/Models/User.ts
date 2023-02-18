@@ -9,10 +9,10 @@ export default class User extends BaseModel {
   public walletAddress: string;
 
   @column()
-  public kycFields: {};
+  public kycFields?: {};
 
   @column()
-  public paymentDetails: {};
+  public paymentDetails?: {};
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;
