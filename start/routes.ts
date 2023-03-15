@@ -26,3 +26,18 @@ Route.get("/", async () => {
 
 Route.post("/signup", "UsersController.signup");
 Route.post("/update-user-information", "UsersController.updateUserInformation");
+Route.post("/create-transaction", "TransactionsController.create");
+Route.post("/debit-user", "TransactionsController.debitUser");
+Route.patch("/update-transaction-status/:id/:userId/:status", "TransactionsController.updateStatus")
+  .where("id", {
+    match: /[0-9]+/,
+    cast: (id: string) => Number(id)
+  })
+  .where("userId", {
+    match: /[0-9]+/,
+    cast: (userId: string) => Number(userId)
+  })
+  .where("status", {
+    match: /[0-9]+/,
+    cast: (status: string) => Number(status)
+  });
