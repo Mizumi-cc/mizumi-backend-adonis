@@ -30,7 +30,7 @@ export interface ITransfer {
   bank_account?: string
 }
 
-export const chargeBankCard = async (data: IChargeBankCard) => {
+export const createPaymentLink = async (data: IChargeBankCard) => {
   return await axios.post(
     `${process.env.PAYBOX_URL}/pay`,
     data,
@@ -47,6 +47,18 @@ export const transfer = async (data: ITransfer) => {
   return await axios.post(
     `${process.env.PAYBOX_URL}/transfer`,
     data,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.PAYBOX_TRANSFER_KEY}`
+      }
+    }
+  )
+}
+
+export const getAllBanks = async () => {
+  return await axios.get(
+    `${process.env.PAYBOX_URL}/settlement_accounts`,
     {
       headers: {
         'Content-Type': 'application/json',

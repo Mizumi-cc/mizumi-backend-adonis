@@ -4,7 +4,7 @@ import { BaseModel, column, hasMany, HasMany } from "@ioc:Adonis/Lucid/Orm";
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
-  public id: number;
+  public id: string;
 
   @column()
   public walletAddress: string;

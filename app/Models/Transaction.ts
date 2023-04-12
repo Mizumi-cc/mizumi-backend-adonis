@@ -4,10 +4,10 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 
 export default class Transaction extends BaseModel {
   @column({ isPrimary: true })
-  public id: number;
+  public id: string;
 
   @column()
-  public userId: number;
+  public userId: string;
 
   @column()
   public blockchainTransactionId: string;
