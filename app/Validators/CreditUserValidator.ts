@@ -5,7 +5,7 @@ export default class CreditUserValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    userId: schema.number(),
+    userId: schema.string(),
     txId: schema.number(),
     amount: schema.number(),
     mobileNetwork: schema.string.optional(),

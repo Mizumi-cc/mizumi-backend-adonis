@@ -26,9 +26,10 @@ Route.get("/", async () => {
 
 Route.post("/signup", "UsersController.signup");
 Route.post("/update-user-information", "UsersController.updateUserInformation");
-Route.post("/create-transaction", "TransactionsController.create");
-Route.post("/debit-user", "TransactionsController.debitUser");
-Route.patch("/update-transaction-status/:id/:userId/:status", "TransactionsController.updateStatus")
+Route.post("/order/create", "TransactionsController.create");
+Route.post("/order/debit", "TransactionsController.debitUser");
+Route.post("/order/credit", "TransactionsController.creditUser");
+Route.patch("/order/:id/:userId/:status", "TransactionsController.updateStatus")
   .where("id", {
     match: /[0-9]+/,
     cast: (id: string) => Number(id)
@@ -41,3 +42,4 @@ Route.patch("/update-transaction-status/:id/:userId/:status", "TransactionsContr
     match: /[0-9]+/,
     cast: (status: string) => Number(status)
   });
+Route.get("/banks", "BankLookupController.fetchAllBanks");
