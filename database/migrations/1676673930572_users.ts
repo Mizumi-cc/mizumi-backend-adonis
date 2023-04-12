@@ -5,7 +5,7 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments("id");
+      table.uuid("id");
       table.string("wallet_address");
       table.json("kyc_fields");
       table.json("payment_details");

@@ -5,8 +5,8 @@ export default class CompleteTransactionValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   public schema = schema.create({
-    userId: schema.number(),
-    txId: schema.number(),
+    userId: schema.string(),
+    txId: schema.string(),
   })
 
   public messages: CustomMessages = {}

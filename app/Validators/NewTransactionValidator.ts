@@ -24,7 +24,7 @@ export default class NewTransactionValidator {
    *    ```
    */
   public schema = schema.create({
-    userId: schema.number(),
+    userId: schema.string(),
     fiatAmount: schema.number(),
     tokenAmount: schema.number(),
     token: schema.number(),

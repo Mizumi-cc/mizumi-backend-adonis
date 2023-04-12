@@ -5,7 +5,7 @@ export default class DebitUserValidator {
 constructor(protected ctx: HttpContextContract) {}
 
 public schema = schema.create({
-  userId: schema.number(),
+  userId: schema.string(),
   txId: schema.number(),
   cardFirstName: schema.string.optional(),
   cardLastName: schema.string.optional(),
