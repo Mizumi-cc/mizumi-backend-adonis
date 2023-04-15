@@ -1,12 +1,16 @@
 import { DateTime } from "luxon";
-import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+import User from "App/Models/User";
+import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 
 export default class Transaction extends BaseModel {
   @column({ isPrimary: true })
-  public id: number;
+  public id: string;
 
   @column()
-  public transactionId: string;
+  public userId: string;
+
+  @column()
+  public blockchainTransactionId: string;
 
   @column()
   public fiatTransactionId: string;
@@ -15,22 +19,22 @@ export default class Transaction extends BaseModel {
   public paymentProvider: string;
 
   @column()
-  public fiatAmount: string;
+  public fiatAmount: number;
 
   @column()
-  public tokenAmount: string;
+  public tokenAmount: number;
 
   @column()
-  public token: string;
+  public token: number;
 
   @column()
-  public fiat: string;
+  public fiat: number;
 
   @column()
-  public status: string;
+  public status: number;
 
   @column()
-  public kind: string;
+  public kind: number;
 
   @column()
   public errorReason: string;
@@ -39,7 +43,7 @@ export default class Transaction extends BaseModel {
   public country: string;
 
   @column()
-  public rate: string;
+  public rate: number;
 
   @column.dateTime({ autoCreate: true })
   public settledDate: DateTime;
@@ -49,4 +53,9 @@ export default class Transaction extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime;
+
+  @hasOne(() => User, ({
+    foreignKey: 'id'
+  }))
+  public user: HasOne<typeof User>
 }

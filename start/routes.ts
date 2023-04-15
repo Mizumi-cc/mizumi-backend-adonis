@@ -18,8 +18,38 @@
 |
 */
 
-import Route from '@ioc:Adonis/Core/Route'
+import Route from "@ioc:Adonis/Core/Route";
 
-Route.get('/', async () => {
-  return { hello: 'world' }
+Route.group(() => {
+  Route.post("/order/create", "TransactionsController.create");
+  Route.post("/order/debit", "TransactionsController.debitUser");
+  Route.post("/order/credit", "TransactionsController.creditUser");
+  Route.patch("/order/:id/:userId/:status", "TransactionsController.updateStatus")
+    .where("id", {
+      match: /[0-9]+/,
+      cast: (id: string) => Number(id)
+    })
+    .where("userId", {
+      match: /[0-9]+/,
+      cast: (userId: string) => Number(userId)
+    })
+    .where("status", {
+      match: /[0-9]+/,
+      cast: (status: string) => Number(status)
+    });
+  Route.get("/banks", "BankLookupController.fetchAllBanks");
+  Route.patch("/wallet-address", "AuthController.saveWalletAddress");
 })
+.prefix('/api/v0')
+.middleware('auth:api');
+
+Route.group(() => {
+  Route.post("/register", "AuthController.register");
+  Route.post("/login", "AuthController.login");
+  Route.post("/logout", "AuthController.logout");
+})
+.prefix('/auth');
+
+Route.get("/me", "AuthController.me")
+.prefix("/auth")
+.middleware("auth:api");
