@@ -20,24 +20,34 @@
 
 import Route from "@ioc:Adonis/Core/Route";
 
-Route.get("/", async () => {
-  return { hello: "world" };
-});
+Route.group(() => {
+  Route.post("/create-transaction", "TransactionsController.create");
+  Route.post("/debit-user", "TransactionsController.debitUser");
+  Route.patch("/update-transaction-status/:id/:userId/:status", "TransactionsController.updateStatus")
+    .where("id", {
+      match: /[0-9]+/,
+      cast: (id: string) => Number(id)
+    })
+    .where("userId", {
+      match: /[0-9]+/,
+      cast: (userId: string) => Number(userId)
+    })
+    .where("status", {
+      match: /[0-9]+/,
+      cast: (status: string) => Number(status)
+    });
+  Route.patch("/wallet-address", "AuthController.saveWalletAddress");
+})
+.prefix('/api/v0')
+.middleware('auth:api');
 
-Route.post("/signup", "UsersController.signup");
-Route.post("/update-user-information", "UsersController.updateUserInformation");
-Route.post("/create-transaction", "TransactionsController.create");
-Route.post("/debit-user", "TransactionsController.debitUser");
-Route.patch("/update-transaction-status/:id/:userId/:status", "TransactionsController.updateStatus")
-  .where("id", {
-    match: /[0-9]+/,
-    cast: (id: string) => Number(id)
-  })
-  .where("userId", {
-    match: /[0-9]+/,
-    cast: (userId: string) => Number(userId)
-  })
-  .where("status", {
-    match: /[0-9]+/,
-    cast: (status: string) => Number(status)
-  });
+Route.group(() => {
+  Route.post("/register", "AuthController.register");
+  Route.post("/login", "AuthController.login");
+  Route.post("/logout", "AuthController.logout");
+})
+.prefix('/auth');
+
+Route.get("/me", "AuthController.me")
+.prefix("/auth")
+.middleware("auth:api");
