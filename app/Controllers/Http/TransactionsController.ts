@@ -10,7 +10,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import { TRANSACTIONKIND, TRANSACTIONSTATUS, STABLES, PAYBOXMODE } from "App/Models/Enums";
 import DebitUserValidator from "App/Validators/DebitUserValidator";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { chargeBankCard, IChargeBankCard, transfer, ITransfer } from "App/Services/Paybox";
+import { createPaymentLink, IChargeBankCard, transfer, ITransfer } from "App/Services/Paybox";
 import CreditUserValidator from "App/Validators/CreditUserValidator";
 import CompleteTransactionValidator from "App/Validators/CompleteTransactionValidator";
 
@@ -121,7 +121,6 @@ export default class TransactionsController {
         ])
         .transaction()
     }
-
     
     return response.json({
       serializedTransaction: swapAccountTx.serialize(),
@@ -172,7 +171,7 @@ export default class TransactionsController {
       const data: IChargeBankCard = {
         amount: `${transaction.fiatAmount}`,
         currency: 'GHS',
-        order_id: transaction.id.toString(),
+        order_id: transaction.id,
         mode: PAYBOXMODE.TEST,
         card_first_name: cardFirstName!,
         card_last_name: cardLastName!,
@@ -186,30 +185,28 @@ export default class TransactionsController {
         card_country: cardCountry!,
         card_email: cardEmail!,
       }
-      const chargeResponse = await chargeBankCard(data)
-        .then((res) => {
-          if (res.data.status === "Success") {
-            return res.data
-          } else {
-            console.log(res.data)
-            return "error"
-          }
-        })
-        .catch((err) => {{
-          console.log(err)
-          return response.internalServerError({
-            error: "Error charging bank card"
-          })
-        }})
+      // const paymentLinkResponse = await createPaymentLink(data)
+      //   .then((res) => {
+      //     if (res.data.status === "Success") {
+      //       return res.data
+      //     } else {
+      //       console.log(res.data)
+      //       return "error"
+      //     }
+      //   })
+      //   .catch((err) => {{
+      //     console.log(err)
+      //     return response.internalServerError({
+      //       error: "Error creating payment link"
+      //     })
+      //   }})
 
-      if (chargeResponse === "error") {
-        return response.internalServerError({
-          error: "Error charging bank card"
-        })
-      }
-      transaction.status = TRANSACTIONSTATUS.DEBITED
-      transaction.fiatTransactionId = chargeResponse.token
-      transaction.paymentProvider = "Paybox"
+      // if (paymentLinkResponse === "error") {
+      //   return response.internalServerError({
+      //     error: "Error creating payment link"
+      //   })
+      // }
+      // transaction.paymentProvider = "Paybox"
       await transaction.save()
 
       return response.json({
@@ -584,5 +581,9 @@ export default class TransactionsController {
     return response.json({
       result: "success"
     })
+  }
+
+  public async debitSuccessCallback({request, response}: HttpContextContract) {
+
   }
 }

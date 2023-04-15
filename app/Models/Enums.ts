@@ -8,7 +8,7 @@ export enum TRANSACTIONSTATUS {
 }
 
 export enum TRANSACTIONKIND {
-  ONRAMP,
+  ONRAMP = 0,
   OFFRAMP,
 }
 
