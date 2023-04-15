@@ -15,12 +15,17 @@
   },
   "preloads": [
     "./start/routes",
-    "./start/kernel"
+    "./start/kernel",
+    "./start/validator"
   ],
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
-    "@adonisjs/lucid"
+    "@adonisjs/lucid",
+    "@adonisjs/auth",
+    "@adonisjs/ally",
+    "@adonisjs/session",
+    "@adonisjs/redis"
   ],
   "aceProviders": [
     "@adonisjs/repl"
