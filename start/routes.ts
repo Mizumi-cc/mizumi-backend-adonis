@@ -47,6 +47,7 @@ Route.group(() => {
   Route.post("/register", "AuthController.register");
   Route.post("/login", "AuthController.login");
   Route.post("/logout", "AuthController.logout");
+  Route.get("/is-unique", "AuthController.isUniqueUsernameOrEmail");
 })
 .prefix('/auth');
 

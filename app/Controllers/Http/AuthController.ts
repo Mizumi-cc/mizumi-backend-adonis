@@ -49,4 +49,18 @@ export default class AuthController {
     const user = auth.user
     return response.status(200).json({ user })
   }
+
+  public async isUniqueUsernameOrEmail({request, response}: HttpContextContract) {
+    const username = request.input('username')
+    const email = request.input('email')
+    console.log(username, email)
+    console.log(`${email ? 'email' : 'username'}`, email ? email : username)
+    const user = await Auth.findBy(`${email ? 'email' : 'username'}`, email ? email : username)
+    console.log(user)
+    if (user) {
+      return response.status(200).json({ isUnique: false })
+    } else {
+      return response.status(200).json({ isUnique: true })
+    }
+  }
 }
