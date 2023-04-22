@@ -54,3 +54,6 @@ Route.group(() => {
 Route.get("/me", "AuthController.me")
 .prefix("/auth")
 .middleware("auth:api");
+
+Route.get("/rates/ghs", "RatesController.getGHSToUSD");
+
