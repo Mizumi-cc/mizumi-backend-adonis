@@ -178,6 +178,9 @@ export default class TransactionsController {
 
     let creditTx: anchor.web3.Transaction;
 
+    let paymentLink = null
+    let serializedTransaction: string | null = null
+
     if (transaction.kind === TRANSACTIONKIND.ONRAMP) {
       const form: PaymentForm = {
         amount: transaction.fiatAmount.toString(),
@@ -198,10 +201,7 @@ export default class TransactionsController {
         .catch((err) => {
           console.log(err, 'err')
         })
-      console.log(res, 'res')
-      return response.json({
-        paymentLink: res.link,
-      })
+      paymentLink = res.link
 
     } else if (transaction.kind === TRANSACTIONKIND.OFFRAMP) {
       const USDC_MINT = new PublicKey(process.env.USDC_MINT as string)
@@ -281,12 +281,15 @@ export default class TransactionsController {
       
       creditTx.feePayer = userWallet;
       creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-      creditTx.partialSign(admin)
+      creditTx.sign({ publicKey: admin.publicKey, secretKey: admin.secretKey })
 
-      return response.json({
-        serializedTransaction: creditTx.serialize(),
-      })
+      serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
     }
+
+    return response.json({
+      serializedTransaction,
+      paymentLink,
+    })
   }
 
   public async creditUser({request, response}: HttpContextContract) {
