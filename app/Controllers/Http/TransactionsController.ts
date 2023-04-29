@@ -12,7 +12,7 @@ import CreditUserValidator from "App/Validators/CreditUserValidator";
 import CompleteTransactionValidator from "App/Validators/CompleteTransactionValidator";
 import Env from "@ioc:Adonis/Core/Env";
 import { PaymentForm, initiatePayment } from "App/Services/Fincra";
-import CheckoutStatusValidator from "App/Validators/CheckoutStatusValidator";
+import FincraWebhookValidator from "App/Validators/CheckoutStatusValidator";
 import crypto from "crypto";
 
 export default class TransactionsController {
@@ -622,8 +622,8 @@ export default class TransactionsController {
     })
   }
 
-  public async checkoutStatus({response, request}: HttpContextContract) {
-    const payload = request.validate(CheckoutStatusValidator)
+  public async fincraWebhook({response, request}: HttpContextContract) {
+    const payload = request.body()
     const webhookSignature = request.header('signature')
     const webhookSecret = Env.get('FINCRA_WEBHOOK_KEY')
     const encryptedData =  crypto
@@ -631,7 +631,21 @@ export default class TransactionsController {
       .update(JSON.stringify(payload)) 
       .digest("hex");
     if (encryptedData === webhookSignature) {
-
+      const transaction = await Transaction.find(payload.data.reference)
+      if (payload.data && payload.data.status === "success") {
+        if (transaction && transaction.status === TRANSACTIONSTATUS.DEBITING) {
+          transaction.status = TRANSACTIONSTATUS.DEBITED
+          await transaction.save()
+        }
+      } else if (payload.type && payload.type.data.status === "success") {
+        if (transaction && transaction.status === TRANSACTIONSTATUS.SETTLING) {
+          transaction.status = TRANSACTIONSTATUS.SETTLED
+          await transaction.save()
+        }
+      }
+      return response.json({
+        result: "success"
+      })
     } else {
       return response.badRequest({
         error: "Invalid signature"
