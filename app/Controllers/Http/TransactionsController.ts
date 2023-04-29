@@ -328,7 +328,9 @@ export default class TransactionsController {
 
     const userWallet = new PublicKey(user.walletAddress as string)
 
-    let debitTx: anchor.web3.Transaction;
+    let creditTx: anchor.web3.Transaction;
+
+    let serializedTransaction: string | null = null
 
     if (transaction.kind === TRANSACTIONKIND.ONRAMP) {
       const USDC_MINT = new PublicKey(process.env.USDC_MINT as string)
@@ -390,7 +392,7 @@ export default class TransactionsController {
 
       const debitAmount = new anchor.BN(transaction.tokenAmount)
       const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
-      debitTx = await program.methods
+      creditTx = await program.methods
         .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {onramp: {}}, `${swaps_count.toNumber()}`)
         .accounts({
           admin: admin.publicKey,
@@ -406,16 +408,18 @@ export default class TransactionsController {
         })
         .transaction();
 
-      debitTx.feePayer = userWallet;
-      debitTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-      debitTx.partialSign(admin)
+      creditTx.feePayer = userWallet;
+      creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+      creditTx.partialSign(admin)
+      serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
 
-      return response.json({
-        serializedTransaction: debitTx.serialize(),
-      })
     } else if (transaction.kind === TRANSACTIONKIND.OFFRAMP) {
       
     }
+
+    return response.json({
+      serializedTransaction,
+    })
   }
 
   public async completeTransaction({request, response}: HttpContextContract) {
