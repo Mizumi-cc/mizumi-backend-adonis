@@ -186,7 +186,7 @@ export default class TransactionsController {
         amount: transaction.fiatAmount.toString(),
         currency: 'NGN',
         reference: transaction.id,
-        redirectUrl: `${Env.get('CLIENT_URL')}`,
+        // redirectUrl: `${Env.get('CLIENT_URL')}`,
         feeBearer: 'business',
         metadata: {
           userId: user.id,
@@ -201,7 +201,7 @@ export default class TransactionsController {
         .catch((err) => {
           console.log(err, 'err')
         })
-      paymentLink = res.link
+      paymentLink = res.body.data.link
 
     } else if (transaction.kind === TRANSACTIONKIND.OFFRAMP) {
       const USDC_MINT = new PublicKey(process.env.USDC_MINT as string)
