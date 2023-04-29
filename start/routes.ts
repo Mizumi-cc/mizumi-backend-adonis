@@ -40,7 +40,7 @@ Route.group(() => {
     .where("userId", {
       match: /[0-9]+/,
     })
-  Route.get("/order/:userId", "TransactionsController.fetchUserTransactions")
+  Route.get("/order/by-user/:userId", "TransactionsController.fetchUserTransactions")
 })
 .prefix('/api/v0')
 .middleware('auth:api');
