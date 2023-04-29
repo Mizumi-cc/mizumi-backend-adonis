@@ -12,7 +12,6 @@ import CreditUserValidator from "App/Validators/CreditUserValidator";
 import CompleteTransactionValidator from "App/Validators/CompleteTransactionValidator";
 import Env from "@ioc:Adonis/Core/Env";
 import { PaymentForm, initiatePayment } from "App/Services/Fincra";
-import FincraWebhookValidator from "App/Validators/CheckoutStatusValidator";
 import crypto from "crypto";
 
 export default class TransactionsController {
