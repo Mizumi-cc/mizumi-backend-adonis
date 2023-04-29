@@ -7,7 +7,6 @@ export default class CreditUserValidator {
   public schema = schema.create({
     userId: schema.string(),
     txId: schema.number(),
-    amount: schema.number(),
     mobileNetwork: schema.string.optional(),
     mobileNumber: schema.string.optional(),
     bankCode: schema.string.optional(),

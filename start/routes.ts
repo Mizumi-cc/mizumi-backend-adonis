@@ -27,18 +27,20 @@ Route.group(() => {
   Route.patch("/order/:id/:userId/:status", "TransactionsController.updateStatus")
     .where("id", {
       match: /[0-9]+/,
-      cast: (id: string) => Number(id)
     })
     .where("userId", {
       match: /[0-9]+/,
-      cast: (userId: string) => Number(userId)
     })
     .where("status", {
       match: /[0-9]+/,
       cast: (status: string) => Number(status)
     });
-  Route.get("/banks", "BankLookupController.fetchAllBanks");
   Route.patch("/wallet-address", "AuthController.saveWalletAddress");
+  Route.get("/order/create-user-program-account-tx/:userId", "TransactionsController.createUserProgramAccountTx")
+    .where("userId", {
+      match: /[0-9]+/,
+    })
+  Route.get("/order/:userId", "TransactionsController.fetchUserTransactions")
 })
 .prefix('/api/v0')
 .middleware('auth:api');
@@ -56,4 +58,6 @@ Route.get("/me", "AuthController.me")
 .middleware("auth:api");
 
 Route.get("/rates/ghs", "RatesController.getGHSToUSD");
+Route.post("/order/checkout-status", "TransactionsController.checkoutStatus");
+Route.get("/order/:id", "TransactionsController.fetchTransaction");
 

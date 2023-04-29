@@ -30,4 +30,12 @@ export default Env.rules({
 	REDIS_PASSWORD: Env.schema.string.optional(),
 	RATES_API_KEY: Env.schema.string(),
 	RATES_API_URL: Env.schema.string(),
+	PROGRAM_ID: Env.schema.string(),
+	ADMIN: Env.schema.string(),
+	ANCHOR_PROVIDER_URL: Env.schema.string(),
+	FINCRA_PK: Env.schema.string(),
+	FINCRA_SK: Env.schema.string(),
+	FINCRA_WEBHOOK_KEY: Env.schema.string(),
+	FINCRA_API_URL: Env.schema.string(),
+	CLIENT_URL: Env.schema.string(),
 })

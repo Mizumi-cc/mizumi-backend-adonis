@@ -1,16 +1,22 @@
 import { DateTime } from "luxon";
+import { v4 as uuid } from "uuid";
 import User from "App/Models/User";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel, column, hasOne, HasOne, beforeCreate } from "@ioc:Adonis/Lucid/Orm";
 
 export default class Transaction extends BaseModel {
   @column({ isPrimary: true })
   public id: string;
 
+  @beforeCreate()
+  public static assignUuid(transaction: Transaction) {
+    transaction.id = uuid()
+  }
+
   @column()
   public userId: string;
 
   @column()
-  public blockchainTransactionId: string;
+  public transactionHash: string;
 
   @column()
   public fiatTransactionId: string;

@@ -20,10 +20,3 @@ export enum STABLES {
 export enum FIATCURRENCY {
   GHS
 }
-
-export enum PAYBOXMODE {
-  TEST = 'Test',
-  CASH = 'Cash',
-  MOBILEMONEY = 'MobileMoney',
-  CARD = 'Card',
-}

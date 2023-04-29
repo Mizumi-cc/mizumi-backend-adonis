@@ -40,7 +40,13 @@ export default class AuthController {
   public async saveWalletAddress({request, auth, response}: HttpContextContract) {
     const { address } = await request.validate(WalletAddressValidator)
     const user = auth.user
-    user?.merge({ walletAddress: address })
+
+    if(!user) {
+      return response.status(401)
+    }
+
+    user.walletAddress = address
+    await user.save()
 
     return response.status(200)
   }
@@ -53,10 +59,7 @@ export default class AuthController {
   public async isUniqueUsernameOrEmail({request, response}: HttpContextContract) {
     const username = request.input('username')
     const email = request.input('email')
-    console.log(username, email)
-    console.log(`${email ? 'email' : 'username'}`, email ? email : username)
     const user = await Auth.findBy(`${email ? 'email' : 'username'}`, email ? email : username)
-    console.log(user)
     if (user) {
       return response.status(200).json({ isUnique: false })
     } else {

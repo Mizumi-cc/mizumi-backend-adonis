@@ -5,20 +5,20 @@ export default class extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.uuid("id");
-      table.integer("user_id");
-      table.string("transaction_id");
+      table.uuid("id").primary();
+      table.string("user_id");
+      table.string("transaction_hash");
       table.string("fiat_transaction_id");
       table.string("payment_provider");
-      table.integer("fiat_amount");
-      table.integer("token_amount");
+      table.float("fiat_amount");
+      table.float("token_amount");
       table.string("token");
       table.string("fiat");
-      table.string("status");
-      table.string("kind");
+      table.integer("status");
+      table.integer("kind");
       table.string("error_reason");
       table.string("country");
-      table.integer("rate");
+      table.float("rate");
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
