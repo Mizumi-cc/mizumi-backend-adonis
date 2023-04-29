@@ -58,6 +58,6 @@ Route.get("/me", "AuthController.me")
 .middleware("auth:api");
 
 Route.get("/rates/ghs", "RatesController.getGHSToUSD");
-Route.post("/order/checkout-status", "TransactionsController.checkoutStatus");
+Route.post("/order/fincra-webhook", "TransactionsController.fincraWebhook");
 Route.get("/order/:id", "TransactionsController.fetchTransaction");
 
