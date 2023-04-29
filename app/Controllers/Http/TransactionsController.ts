@@ -186,7 +186,7 @@ export default class TransactionsController {
         amount: transaction.fiatAmount.toString(),
         currency: 'NGN',
         reference: transaction.id,
-        // redirectUrl: `${Env.get('CLIENT_URL')}`,
+        redirectUrl: `${Env.get('CLIENT_URL')}`,
         feeBearer: 'business',
         metadata: {
           userId: user.id,
