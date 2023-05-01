@@ -317,6 +317,7 @@ export default class TransactionsController {
     }
 
     if (transaction.status !== TRANSACTIONSTATUS.DEBITED) {
+      console.log(transaction.status, 'status')
       return response.badRequest({
         error: "Transaction not debited"
       })
@@ -325,7 +326,11 @@ export default class TransactionsController {
     transaction.status = TRANSACTIONSTATUS.SETTLING
     await transaction.save()
 
+    console.log('here')
+
     const userWallet = new PublicKey(user.walletAddress as string)
+
+    console.log('here again')
 
     let creditTx: anchor.web3.Transaction;
 
