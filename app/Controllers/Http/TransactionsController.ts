@@ -623,6 +623,7 @@ export default class TransactionsController {
 
   public async fincraWebhook({response, request}: HttpContextContract) {
     const payload = request.body()
+    console.log(payload, 'webhook payload')
     const webhookSignature = request.header('signature')
     const webhookSecret = Env.get('FINCRA_WEBHOOK_KEY')
     const encryptedData =  crypto
@@ -630,6 +631,7 @@ export default class TransactionsController {
       .update(JSON.stringify(payload)) 
       .digest("hex");
     if (encryptedData === webhookSignature) {
+      console.log('webhook verified')
       const transaction = await Transaction.find(payload.data.reference)
       if (payload.data && payload.data.status === "success") {
         if (transaction && transaction.status === TRANSACTIONSTATUS.DEBITING) {
@@ -646,6 +648,7 @@ export default class TransactionsController {
         result: "success"
       })
     } else {
+      console.log('invalid webhook signature')
       return response.badRequest({
         error: "Invalid signature"
       })
