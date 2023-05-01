@@ -640,6 +640,7 @@ export default class TransactionsController {
       const transaction = await Transaction.find(payload.data.reference)
       if (payload.data && payload.data.status === "success") {
         if (transaction && transaction.status === TRANSACTIONSTATUS.DEBITING) {
+          console.log('now debited')
           transaction.status = TRANSACTIONSTATUS.DEBITED
           await transaction.save()
         }
