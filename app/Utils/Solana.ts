@@ -3,8 +3,6 @@ import { getAssociatedTokenAddressSync,
   ASSOCIATED_TOKEN_PROGRAM_ID, 
   Account, 
   getAccount,
-  TokenAccountNotFoundError,
-  TokenInvalidAccountOwnerError,
   TokenInvalidMintError,
   TokenInvalidOwnerError,
   createAssociatedTokenAccountInstruction
