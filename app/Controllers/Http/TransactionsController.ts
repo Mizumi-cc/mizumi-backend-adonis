@@ -395,10 +395,10 @@ export default class TransactionsController {
       )
 
       const debitAmount = new anchor.BN(transaction.tokenAmount)
-      const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
+      const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
       console.log(tokenArgument, debitAmount.toString())
       creditTx = await program.methods
-        .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {onramp: {}}, `${swaps_count.toNumber()}`)
+        .initiateSwap(tokenArgument, debitAmount, {ghs: {} as never}, {onramp: {}}, `${swaps_count.toNumber()}`)
         .accounts({
           admin: admin.publicKey,
           authority: userWallet,
