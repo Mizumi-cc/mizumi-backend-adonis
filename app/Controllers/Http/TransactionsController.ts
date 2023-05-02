@@ -396,6 +396,7 @@ export default class TransactionsController {
 
       const debitAmount = new anchor.BN(transaction.tokenAmount)
       const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
+      console.log(tokenArgument, debitAmount.toString())
       creditTx = await program.methods
         .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {onramp: {}}, `${swaps_count.toNumber()}`)
         .accounts({
