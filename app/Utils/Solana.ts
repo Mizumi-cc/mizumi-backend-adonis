@@ -28,8 +28,8 @@ export const getOrCreateAssociatedTokenAccount = async (
   try {
     account = await getAccount(connection, associatedToken)
   } catch (error: any) {
-    console.log(Object.keys(error), 'error')
-    if (error.type === "TokenAccountNotFoundError" || error.type === "TokenInvalidAccountOwnerError") {
+    console.log(error.name, 'error')
+    if (error.name === "TokenAccountNotFoundError" || error.name === "TokenInvalidAccountOwnerError") {
       try {
         const transaction = new Transaction().add(
           createAssociatedTokenAccountInstruction(
