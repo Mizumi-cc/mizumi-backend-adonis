@@ -7,7 +7,7 @@ import { IDL } from "App/Types/MizumiProgram";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { TRANSACTIONKIND, TRANSACTIONSTATUS, STABLES } from "App/Models/Enums";
 import DebitUserValidator from "App/Validators/DebitUserValidator";
-import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getAssociatedTokenAddressSync, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import CreditUserValidator from "App/Validators/CreditUserValidator";
 import CompleteTransactionValidator from "App/Validators/CompleteTransactionValidator";
 import Env from "@ioc:Adonis/Core/Env";
@@ -49,8 +49,9 @@ export default class TransactionsController {
     })
     const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
 
+    const connection = new Connection(Env.get('ANCHOR_PROVIDER_URL'))
     const provider = new anchor.AnchorProvider(
-      new Connection(Env.get('ANCHOR_PROVIDER_URL')),
+      connection,
       new anchor.Wallet(admin),
       anchor.AnchorProvider.defaultOptions()
     )
@@ -208,8 +209,10 @@ export default class TransactionsController {
     
       const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
 
+      const connection = new Connection(Env.get('ANCHOR_PROVIDER_URL'))
+
       const provider = new anchor.AnchorProvider(
-        new Connection(Env.get('ANCHOR_PROVIDER_URL')),
+        connection,
         new anchor.Wallet(admin),
         anchor.AnchorProvider.defaultOptions()
       )
@@ -252,11 +255,13 @@ export default class TransactionsController {
         program.programId
       )
 
-      const usdc_associated_token_acc = getAssociatedTokenAddressSync(
+      const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+        connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDC_MINT, userWallet, true
       )
 
-      const usdt_associated_token_acc = getAssociatedTokenAddressSync(
+      const usdt_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+        connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDT_MINT, userWallet, true
       )
 
@@ -267,8 +272,8 @@ export default class TransactionsController {
         .accounts({
           admin: admin.publicKey,
           authority: userWallet,
-          authorityUsdc: usdc_associated_token_acc,
-          authorityUsdt: usdt_associated_token_acc,
+          authorityUsdc: usdc_associated_token_acc.address,
+          authorityUsdt: usdt_associated_token_acc.address,
           userAccount: user_acc_pda,
           swapAccount: swap_acc_pda,
           usdcVault: usdc_vault_pda,
@@ -342,8 +347,9 @@ export default class TransactionsController {
     
       const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
 
+      const connection = new Connection(Env.get('ANCHOR_PROVIDER_URL'))
       const provider = new anchor.AnchorProvider(
-        new Connection(Env.get('ANCHOR_PROVIDER_URL')),
+        connection,
         new anchor.Wallet(admin),
         anchor.AnchorProvider.defaultOptions()
       )
@@ -386,11 +392,13 @@ export default class TransactionsController {
         program.programId
       )
 
-      const usdc_associated_token_acc = getAssociatedTokenAddressSync(
+      const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+        connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDC_MINT, userWallet, true
       )
 
-      const usdt_associated_token_acc = getAssociatedTokenAddressSync(
+      const usdt_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+        connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDT_MINT, userWallet, true
       )
 
@@ -402,8 +410,8 @@ export default class TransactionsController {
         .accounts({
           admin: admin.publicKey,
           authority: userWallet,
-          authorityUsdc: usdc_associated_token_acc,
-          authorityUsdt: usdt_associated_token_acc,
+          authorityUsdc: usdc_associated_token_acc.address,
+          authorityUsdt: usdt_associated_token_acc.address,
           userAccount: user_acc_pda,
           swapAccount: swap_acc_pda,
           usdc: USDC_MINT,
