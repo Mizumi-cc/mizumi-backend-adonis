@@ -405,6 +405,8 @@ export default class TransactionsController {
           authorityUsdt: usdt_associated_token_acc,
           userAccount: user_acc_pda,
           swapAccount: swap_acc_pda,
+          usdc: USDC_MINT,
+          usdt: USDT_MINT,
           usdcVault: usdc_vault_pda,
           usdtVault: usdt_vault_pda,
           clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
