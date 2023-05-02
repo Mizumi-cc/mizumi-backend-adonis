@@ -1,4 +1,4 @@
-import { getAssociatedTokenAddress, 
+import { getAssociatedTokenAddressSync, 
   TOKEN_PROGRAM_ID, 
   ASSOCIATED_TOKEN_PROGRAM_ID, 
   Account, 
@@ -17,7 +17,7 @@ export const getOrCreateAssociatedTokenAccount = async (
   owner: PublicKey,
   allowOwnerOffCurve: boolean,
 ) => {
-  const associatedToken = await getAssociatedTokenAddress(
+  const associatedToken = getAssociatedTokenAddressSync(
     mint,
     owner,
     allowOwnerOffCurve,
