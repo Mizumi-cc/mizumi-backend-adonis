@@ -411,7 +411,6 @@ export default class TransactionsController {
           usdcVault: usdc_vault_pda,
           usdtVault: usdt_vault_pda,
           clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-          tokenProgram: TOKEN_PROGRAM_ID,
         })
         .transaction();
 
