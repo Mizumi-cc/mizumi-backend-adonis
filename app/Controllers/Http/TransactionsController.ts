@@ -7,12 +7,13 @@ import { IDL } from "App/Types/MizumiProgram";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { TRANSACTIONKIND, TRANSACTIONSTATUS, STABLES } from "App/Models/Enums";
 import DebitUserValidator from "App/Validators/DebitUserValidator";
-import { getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import CreditUserValidator from "App/Validators/CreditUserValidator";
 import CompleteTransactionValidator from "App/Validators/CompleteTransactionValidator";
 import Env from "@ioc:Adonis/Core/Env";
 import { PaymentForm, initiatePayment } from "App/Services/Fincra";
 import crypto from "crypto";
+import { getOrCreateAssociatedTokenAccount } from "App/Utils/Solana";
 
 export default class TransactionsController {
   public async create({request, response}: HttpContextContract) {
