@@ -2,7 +2,7 @@ import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Transaction from "App/Models/Transaction";
 import Auth from "App/Models/Auth";
 import NewTransactionValidator from "App/Validators/NewTransactionValidator";
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { IDL } from "App/Types/MizumiProgram";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { TRANSACTIONKIND, TRANSACTIONSTATUS, STABLES } from "App/Models/Enums";
