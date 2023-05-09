@@ -72,7 +72,7 @@ export default class TransactionsController {
     let swapAccountTx: anchor.web3.Transaction;
     
     const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount;
-    console.log(swaps_count, 'swaps_count')
+    console.log(swaps_count.toNumber(), 'swaps_count')
 
     if (swaps_count.toNumber() !== 0) {
       const new_swaps_count = swaps_count.add(new anchor.BN(1));
