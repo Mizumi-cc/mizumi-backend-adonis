@@ -41,6 +41,7 @@ Route.group(() => {
       match: /[0-9]+/,
     })
   Route.get("/order/by-user/:userId", "TransactionsController.fetchUserTransactions")
+  Route.post("/order/complete", "TransactionsController.completeTransaction")
 })
 .prefix('/api/v0')
 .middleware('auth:api');
