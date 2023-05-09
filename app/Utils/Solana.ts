@@ -44,7 +44,8 @@ export const getOrCreateAssociatedTokenAccount = async (
           )
         );
 
-        await sendAndConfirmTransaction(connection, transaction, [payer])
+        const result = await sendAndConfirmTransaction(connection, transaction, [payer])
+        console.log(result, 'result')
       } catch (error) {
         
       }
