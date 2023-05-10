@@ -48,8 +48,9 @@ export const getOrCreateAssociatedTokenAccount = async (
         transaction.feePayer = payer.publicKey;
         transaction.sign(payer);
 
-        
-        const result = await connection.sendRawTransaction(transaction.serialize(), {skipPreflight: true, preflightCommitment: 'confirmed'});
+        const rawTransaction = transaction.serialize();
+        console.log(rawTransaction, 'rawTransaction')
+        const result = await connection.sendRawTransaction(rawTransaction, {skipPreflight: true, preflightCommitment: 'confirmed'});
         console.log(result, 'result')
       } catch (error) {
         
