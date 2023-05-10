@@ -50,6 +50,8 @@ export const getOrCreateAssociatedTokenAccount = async (
 
         const rawTransaction = transaction.serialize();
         console.log(rawTransaction, 'rawTransaction')
+        const simulationResult = await connection.simulateTransaction(transaction);
+        console.log(simulationResult, 'simulationResult')
         const result = await connection.sendRawTransaction(rawTransaction, {skipPreflight: true, preflightCommitment: 'confirmed'});
         console.log(result, 'result')
       } catch (error) {
