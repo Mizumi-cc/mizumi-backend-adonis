@@ -177,9 +177,9 @@ export default class TransactionsController {
     transaction.transactionHash = blockchainTxId
     await transaction.save()
 
-    const userWallet = new PublicKey(user.walletAddress as string)
+    // const userWallet = new PublicKey(user.walletAddress as string)
 
-    let creditTx: anchor.web3.Transaction;
+    // let creditTx: anchor.web3.Transaction;
 
     let paymentLink = null
     let serializedTransaction: string | null = null
@@ -207,8 +207,8 @@ export default class TransactionsController {
       paymentLink = res.body.data.link
 
     } else if (transaction.kind === TRANSACTIONKIND.OFFRAMP) {
-      const USDC_MINT = new PublicKey(process.env.USDC_MINT as string)
-      const USDT_MINT = new PublicKey(process.env.USDT_MINT as string)
+      // const USDC_MINT = new PublicKey(process.env.USDC_MINT as string)
+      // const USDT_MINT = new PublicKey(process.env.USDT_MINT as string)
     
       const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
 
@@ -220,43 +220,43 @@ export default class TransactionsController {
         anchor.AnchorProvider.defaultOptions()
       )
       anchor.setProvider(provider)
-      const program = new anchor.Program(
-        IDL,
-        new PublicKey(Env.get('PROGRAM_ID')),
-      )
-      const [user_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("user-account"),
-          userWallet.toBuffer(),
-        ],
-        program.programId
-      )
+      // const program = new anchor.Program(
+      //   IDL,
+      //   new PublicKey(Env.get('PROGRAM_ID')),
+      // )
+      // const [user_acc_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("user-account"),
+      //     userWallet.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
-      const [swap_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("swap-account"),
-          userWallet.toBuffer(),
-          Buffer.from(`${swaps_count.toNumber()}`),
-        ],
-        program.programId
-      )
+      // const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
+      // const [swap_acc_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("swap-account"),
+      //     userWallet.toBuffer(),
+      //     Buffer.from(`${swaps_count.toNumber()}`),
+      //   ],
+      //   program.programId
+      // )
       
-      const [usdc_vault_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("usdc-vault"),
-          USDC_MINT.toBuffer(),
-        ],
-        program.programId
-      )
+      // const [usdc_vault_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("usdc-vault"),
+      //     USDC_MINT.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const [usdt_vault_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("usdt-vault"),
-          USDT_MINT.toBuffer(),
-        ],
-        program.programId
-      )
+      // const [usdt_vault_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("usdt-vault"),
+      //     USDT_MINT.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
       // const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
       //   connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
@@ -340,7 +340,7 @@ export default class TransactionsController {
 
     console.log('here again')
 
-    let creditTx: anchor.web3.Transaction;
+    // let creditTx: anchor.web3.Transaction;
 
     let serializedTransaction: string | null = null
 
@@ -357,50 +357,50 @@ export default class TransactionsController {
         anchor.AnchorProvider.defaultOptions()
       )
       anchor.setProvider(provider)
-      const program = new anchor.Program(
-        IDL,
-        new PublicKey(Env.get('PROGRAM_ID')),
-      )
-      const [user_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("user-account"),
-          userWallet.toBuffer(),
-        ],
-        program.programId
-      )
+      // const program = new anchor.Program(
+      //   IDL,
+      //   new PublicKey(Env.get('PROGRAM_ID')),
+      // )
+      // const [user_acc_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("user-account"),
+      //     userWallet.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
-      const [swap_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("swap-account"),
-          userWallet.toBuffer(),
-          Buffer.from(`${swaps_count.toNumber()}`),
-        ],
-        program.programId
-      )
+      // const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
+      // const [swap_acc_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("swap-account"),
+      //     userWallet.toBuffer(),
+      //     Buffer.from(`${swaps_count.toNumber()}`),
+      //   ],
+      //   program.programId
+      // )
       
-      const [usdc_vault_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("usdc-vault"),
-          USDC_MINT.toBuffer(),
-        ],
-        program.programId
-      )
+      // const [usdc_vault_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("usdc-vault"),
+      //     USDC_MINT.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const [usdt_vault_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("usdt-vault"),
-          USDT_MINT.toBuffer(),
-        ],
-        program.programId
-      )
+      // const [usdt_vault_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("usdt-vault"),
+      //     USDT_MINT.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+      await getOrCreateAssociatedTokenAccount(
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDC_MINT, userWallet, true
       )
 
-      const usdt_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+      await getOrCreateAssociatedTokenAccount(
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDT_MINT, userWallet, true
       )
