@@ -7,7 +7,7 @@ import { getAssociatedTokenAddressSync,
   // TokenInvalidOwnerError,
   createAssociatedTokenAccountInstruction
 } from "@solana/spl-token"
-import { Signer, Connection, PublicKey, Transaction, sendAndConfirmTransaction } from "@solana/web3.js"
+import { Signer, Connection, PublicKey, Transaction } from "@solana/web3.js"
 export const getOrCreateAssociatedTokenAccount = async (
   connection: Connection,
   payer: Signer,
@@ -43,8 +43,13 @@ export const getOrCreateAssociatedTokenAccount = async (
             ASSOCIATED_TOKEN_PROGRAM_ID
           )
         );
+
+        transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+        transaction.feePayer = payer.publicKey;
+        transaction.sign(payer);
+
         
-        const result = await sendAndConfirmTransaction(connection, transaction, [payer])
+        const result = await connection.sendRawTransaction(transaction.serialize(), {skipPreflight: true, preflightCommitment: 'confirmed'});
         console.log(result, 'result')
       } catch (error) {
         
