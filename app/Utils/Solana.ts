@@ -43,8 +43,6 @@ export const getOrCreateAssociatedTokenAccount = async (
             ASSOCIATED_TOKEN_PROGRAM_ID
           )
         );
-
-        console.log('transaction', transaction)
         
         const result = await sendAndConfirmTransaction(connection, transaction, [payer])
         console.log(result, 'result')
