@@ -256,39 +256,39 @@ export default class TransactionsController {
         program.programId
       )
 
-      const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
-        connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
-        USDC_MINT, userWallet, true
-      )
+      // const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+      //   connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
+      //   USDC_MINT, userWallet, true
+      // )
 
-      const usdt_associated_token_acc = await getOrCreateAssociatedTokenAccount(
-        connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
-        USDT_MINT, userWallet, true
-      )
+      // const usdt_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+      //   connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
+      //   USDT_MINT, userWallet, true
+      // )
 
-      const debitAmount = new anchor.BN(transaction.tokenAmount)
-      const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
-      creditTx = await program.methods
-        .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {offramp: {}}, `${swaps_count.toNumber()}`)
-        .accounts({
-          admin: admin.publicKey,
-          authority: userWallet,
-          authorityUsdc: usdc_associated_token_acc.address,
-          authorityUsdt: usdt_associated_token_acc.address,
-          userAccount: user_acc_pda,
-          swapAccount: swap_acc_pda,
-          usdcVault: usdc_vault_pda,
-          usdtVault: usdt_vault_pda,
-          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-          tokenProgram: TOKEN_PROGRAM_ID,
-        })
-        .transaction();
+      // const debitAmount = new anchor.BN(transaction.tokenAmount)
+      // const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
+      // creditTx = await program.methods
+      //   .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {offramp: {}}, `${swaps_count.toNumber()}`)
+      //   .accounts({
+      //     admin: admin.publicKey,
+      //     authority: userWallet,
+      //     authorityUsdc: usdc_associated_token_acc.address,
+      //     authorityUsdt: usdt_associated_token_acc.address,
+      //     userAccount: user_acc_pda,
+      //     swapAccount: swap_acc_pda,
+      //     usdcVault: usdc_vault_pda,
+      //     usdtVault: usdt_vault_pda,
+      //     clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+      //     tokenProgram: TOKEN_PROGRAM_ID,
+      //   })
+      //   .transaction();
       
-      creditTx.feePayer = userWallet;
-      creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-      creditTx.sign({ publicKey: admin.publicKey, secretKey: admin.secretKey })
+      // creditTx.feePayer = userWallet;
+      // creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+      // creditTx.sign({ publicKey: admin.publicKey, secretKey: admin.secretKey })
 
-      serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
+      // serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
     }
 
     return response.json({
@@ -403,30 +403,30 @@ export default class TransactionsController {
         USDT_MINT, userWallet, true
       )
 
-      const debitAmount = new anchor.BN(transaction.tokenAmount)
-      const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
-      console.log(tokenArgument, debitAmount.toString())
-      creditTx = await program.methods
-        .initiateSwap(tokenArgument, debitAmount, {ghs: {} as never}, {onramp: {}}, `${swaps_count.toNumber()}`)
-        .accounts({
-          admin: admin.publicKey,
-          authority: userWallet,
-          authorityUsdc: usdc_associated_token_acc.address,
-          authorityUsdt: usdt_associated_token_acc.address,
-          userAccount: user_acc_pda,
-          swapAccount: swap_acc_pda,
-          usdc: USDC_MINT,
-          usdt: USDT_MINT,
-          usdcVault: usdc_vault_pda,
-          usdtVault: usdt_vault_pda,
-          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-        })
-        .transaction();
+      // const debitAmount = new anchor.BN(transaction.tokenAmount)
+      // const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
+      // console.log(tokenArgument, debitAmount.toString())
+      // creditTx = await program.methods
+      //   .initiateSwap(tokenArgument, debitAmount, {ghs: {} as never}, {onramp: {}}, `${swaps_count.toNumber()}`)
+      //   .accounts({
+      //     admin: admin.publicKey,
+      //     authority: userWallet,
+      //     authorityUsdc: usdc_associated_token_acc.address,
+      //     authorityUsdt: usdt_associated_token_acc.address,
+      //     userAccount: user_acc_pda,
+      //     swapAccount: swap_acc_pda,
+      //     usdc: USDC_MINT,
+      //     usdt: USDT_MINT,
+      //     usdcVault: usdc_vault_pda,
+      //     usdtVault: usdt_vault_pda,
+      //     clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+      //   })
+      //   .transaction();
 
-      creditTx.feePayer = userWallet;
-      creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-      creditTx.partialSign(admin)
-      serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
+      // creditTx.feePayer = userWallet;
+      // creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+      // creditTx.partialSign(admin)
+      // serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
 
     } else if (transaction.kind === TRANSACTIONKIND.OFFRAMP) {
       

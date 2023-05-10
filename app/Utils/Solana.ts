@@ -51,7 +51,7 @@ export const getOrCreateAssociatedTokenAccount = async (
       } catch (error) {
         
       }
-      account = await getAccount(connection, associatedToken, 'confirmed', TOKEN_PROGRAM_ID);
+      // account = await getAccount(connection, associatedToken, 'confirmed', TOKEN_PROGRAM_ID);
 
     } else {
       console.log(error.name, 'errorss')
@@ -59,8 +59,8 @@ export const getOrCreateAssociatedTokenAccount = async (
       throw error;
     }
   }
-  if (!account.mint.equals(mint)) throw new TokenInvalidMintError();
-  if (!account.owner.equals(owner)) throw new TokenInvalidOwnerError();
+  // if (!account.mint.equals(mint)) throw new TokenInvalidMintError();
+  // if (!account.owner.equals(owner)) throw new TokenInvalidOwnerError();
 
-  return account;
+  // return account;
 }
