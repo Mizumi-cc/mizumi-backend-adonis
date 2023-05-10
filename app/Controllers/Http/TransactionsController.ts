@@ -5,9 +5,11 @@ import NewTransactionValidator from "App/Validators/NewTransactionValidator";
 import * as anchor from "@project-serum/anchor";
 import { IDL } from "App/Types/MizumiProgram";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { TRANSACTIONKIND, TRANSACTIONSTATUS, STABLES } from "App/Models/Enums";
+import { TRANSACTIONKIND, TRANSACTIONSTATUS,
+   //STABLES 
+  } from "App/Models/Enums";
 import DebitUserValidator from "App/Validators/DebitUserValidator";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+// import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import CreditUserValidator from "App/Validators/CreditUserValidator";
 import CompleteTransactionValidator from "App/Validators/CompleteTransactionValidator";
 import Env from "@ioc:Adonis/Core/Env";
