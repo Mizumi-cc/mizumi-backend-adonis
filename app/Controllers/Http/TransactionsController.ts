@@ -511,9 +511,10 @@ export default class TransactionsController {
     tx.feePayer = userWallet;
     tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
     tx.partialSign(admin)
+    const serializedTransaction = Buffer.from(tx.serialize({ requireAllSignatures: false })).toString('base64')
     
     return response.json({
-      serializedTransaction: tx.serialize(),
+      serializedTransaction
     })
   }
 
