@@ -3,8 +3,8 @@ import { getAssociatedTokenAddressSync,
   ASSOCIATED_TOKEN_PROGRAM_ID, 
   Account, 
   getAccount,
-  // TokenInvalidMintError,
-  // TokenInvalidOwnerError,
+  TokenInvalidMintError,
+  TokenInvalidOwnerError,
   createAssociatedTokenAccountInstruction
 } from "@solana/spl-token"
 import { Signer, Connection, PublicKey, Transaction } from "@solana/web3.js"
@@ -57,7 +57,7 @@ export const getOrCreateAssociatedTokenAccount = async (
       } catch (error) {
         
       }
-      // account = await getAccount(connection, associatedToken, 'confirmed', TOKEN_PROGRAM_ID);
+      account = await getAccount(connection, associatedToken, 'confirmed', TOKEN_PROGRAM_ID);
 
     } else {
       console.log(error.name, 'errorss')
@@ -65,8 +65,8 @@ export const getOrCreateAssociatedTokenAccount = async (
       throw error;
     }
   }
-  // if (!account.mint.equals(mint)) throw new TokenInvalidMintError();
-  // if (!account.owner.equals(owner)) throw new TokenInvalidOwnerError();
+  if (!account.mint.equals(mint)) throw new TokenInvalidMintError();
+  if (!account.owner.equals(owner)) throw new TokenInvalidOwnerError();
 
   return account;
 }
