@@ -268,7 +268,7 @@ export default class TransactionsController {
         USDT_MINT, userWallet, true
       )
 
-      const debitAmount = new anchor.BN(transaction.tokenAmount)
+      const debitAmount = new anchor.BN(transaction.tokenAmount * 1e9)
       const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
       creditTx = await program.methods
         .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {offramp: {}}, `${swaps_count.toNumber()}`)
@@ -400,11 +400,11 @@ export default class TransactionsController {
         USDT_MINT, userWallet, true
       )
 
-      const debitAmount = new anchor.BN(transaction.tokenAmount)
+      const creditAmount = new anchor.BN(transaction.tokenAmount * 1e9)
       const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
-      console.log(tokenArgument, debitAmount.toString())
+      console.log(tokenArgument, creditAmount.toString())
       creditTx = await program.methods
-        .initiateSwap(tokenArgument, debitAmount, {ghs: {} as never}, {onramp: {}}, `${swaps_count.toNumber()}`)
+        .initiateSwap(tokenArgument, creditAmount, {ghs: {} as never}, {onramp: {}}, `${swaps_count.toNumber()}`)
         .accounts({
           admin: admin.publicKey,
           authority: userWallet,
@@ -512,7 +512,7 @@ export default class TransactionsController {
     tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
     tx.partialSign(admin)
     const serializedTransaction = Buffer.from(tx.serialize({ requireAllSignatures: false })).toString('base64')
-    
+
     return response.json({
       serializedTransaction
     })
