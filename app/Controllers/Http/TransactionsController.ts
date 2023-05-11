@@ -6,16 +6,16 @@ import * as anchor from "@project-serum/anchor";
 import { IDL } from "App/Types/MizumiProgram";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { TRANSACTIONKIND, TRANSACTIONSTATUS,
-   STABLES 
+  //  STABLES 
   } from "App/Models/Enums";
 import DebitUserValidator from "App/Validators/DebitUserValidator";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+// import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import CreditUserValidator from "App/Validators/CreditUserValidator";
 import CompleteTransactionValidator from "App/Validators/CompleteTransactionValidator";
 import Env from "@ioc:Adonis/Core/Env";
 import { PaymentForm, initiatePayment } from "App/Services/Fincra";
 import crypto from "crypto";
-import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+import { getOrCreateAssociatedTokenAccount } from "App/Utils/Solana";
 
 export default class TransactionsController {
   public async create({request, response}: HttpContextContract) {
@@ -179,7 +179,7 @@ export default class TransactionsController {
 
     const userWallet = new PublicKey(user.walletAddress as string)
 
-    let creditTx: anchor.web3.Transaction;
+    // let creditTx: anchor.web3.Transaction;
 
     let paymentLink = null
     let serializedTransaction: string | null = null
@@ -220,77 +220,77 @@ export default class TransactionsController {
         anchor.AnchorProvider.defaultOptions()
       )
       anchor.setProvider(provider)
-      const program = new anchor.Program(
-        IDL,
-        new PublicKey(Env.get('PROGRAM_ID')),
-      )
-      const [user_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("user-account"),
-          userWallet.toBuffer(),
-        ],
-        program.programId
-      )
+      // const program = new anchor.Program(
+      //   IDL,
+      //   new PublicKey(Env.get('PROGRAM_ID')),
+      // )
+      // const [user_acc_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("user-account"),
+      //     userWallet.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
-      const [swap_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("swap-account"),
-          userWallet.toBuffer(),
-          Buffer.from(`${swaps_count.toNumber()}`),
-        ],
-        program.programId
-      )
+      // const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
+      // const [swap_acc_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("swap-account"),
+      //     userWallet.toBuffer(),
+      //     Buffer.from(`${swaps_count.toNumber()}`),
+      //   ],
+      //   program.programId
+      // )
       
-      const [usdc_vault_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("usdc-vault"),
-          USDC_MINT.toBuffer(),
-        ],
-        program.programId
-      )
+      // const [usdc_vault_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("usdc-vault"),
+      //     USDC_MINT.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const [usdt_vault_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("usdt-vault"),
-          USDT_MINT.toBuffer(),
-        ],
-        program.programId
-      )
+      // const [usdt_vault_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("usdt-vault"),
+      //     USDT_MINT.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+      await getOrCreateAssociatedTokenAccount(
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDC_MINT, userWallet, true
       )
 
-      const usdt_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+      await getOrCreateAssociatedTokenAccount(
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDT_MINT, userWallet, true
       )
 
-      const debitAmount = new anchor.BN(transaction.tokenAmount)
-      const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
-      creditTx = await program.methods
-        .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {offramp: {}}, `${swaps_count.toNumber()}`)
-        .accounts({
-          admin: admin.publicKey,
-          authority: userWallet,
-          authorityUsdc: usdc_associated_token_acc.address,
-          authorityUsdt: usdt_associated_token_acc.address,
-          userAccount: user_acc_pda,
-          swapAccount: swap_acc_pda,
-          usdcVault: usdc_vault_pda,
-          usdtVault: usdt_vault_pda,
-          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-          tokenProgram: TOKEN_PROGRAM_ID,
-        })
-        .transaction();
+      // const debitAmount = new anchor.BN(transaction.tokenAmount)
+      // const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
+      // creditTx = await program.methods
+      //   .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {offramp: {}}, `${swaps_count.toNumber()}`)
+      //   .accounts({
+      //     admin: admin.publicKey,
+      //     authority: userWallet,
+      //     authorityUsdc: usdc_associated_token_acc.address,
+      //     authorityUsdt: usdt_associated_token_acc.address,
+      //     userAccount: user_acc_pda,
+      //     swapAccount: swap_acc_pda,
+      //     usdcVault: usdc_vault_pda,
+      //     usdtVault: usdt_vault_pda,
+      //     clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+      //     tokenProgram: TOKEN_PROGRAM_ID,
+      //   })
+      //   .transaction();
       
-      creditTx.feePayer = userWallet;
-      creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-      creditTx.sign({ publicKey: admin.publicKey, secretKey: admin.secretKey })
+      // creditTx.feePayer = userWallet;
+      // creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+      // creditTx.sign({ publicKey: admin.publicKey, secretKey: admin.secretKey })
 
-      serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
+      // serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
     }
 
     return response.json({
@@ -324,23 +324,18 @@ export default class TransactionsController {
       })
     }
 
-    if (transaction.status !== TRANSACTIONSTATUS.DEBITED) {
-      console.log(transaction.status, 'status')
-      return response.badRequest({
-        error: "Transaction not debited"
-      })
-    }
+    // if (transaction.status !== TRANSACTIONSTATUS.DEBITED) {
+    //   return response.badRequest({
+    //     error: "Transaction not debited"
+    //   })
+    // }
 
     transaction.status = TRANSACTIONSTATUS.SETTLING
     await transaction.save()
 
-    console.log('here')
-
     const userWallet = new PublicKey(user.walletAddress as string)
 
-    console.log('here again')
-
-    let creditTx: anchor.web3.Transaction;
+    // let creditTx: anchor.web3.Transaction;
 
     let serializedTransaction: string | null = null
 
@@ -357,78 +352,78 @@ export default class TransactionsController {
         anchor.AnchorProvider.defaultOptions()
       )
       anchor.setProvider(provider)
-      const program = new anchor.Program(
-        IDL,
-        new PublicKey(Env.get('PROGRAM_ID')),
-      )
-      const [user_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("user-account"),
-          userWallet.toBuffer(),
-        ],
-        program.programId
-      )
+      // const program = new anchor.Program(
+      //   IDL,
+      //   new PublicKey(Env.get('PROGRAM_ID')),
+      // )
+      // const [user_acc_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("user-account"),
+      //     userWallet.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
-      const [swap_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("swap-account"),
-          userWallet.toBuffer(),
-          Buffer.from(`${swaps_count.toNumber()}`),
-        ],
-        program.programId
-      )
+      // const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
+      // const [swap_acc_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("swap-account"),
+      //     userWallet.toBuffer(),
+      //     Buffer.from(`${swaps_count.toNumber()}`),
+      //   ],
+      //   program.programId
+      // )
       
-      const [usdc_vault_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("usdc-vault"),
-          USDC_MINT.toBuffer(),
-        ],
-        program.programId
-      )
+      // const [usdc_vault_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("usdc-vault"),
+      //     USDC_MINT.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const [usdt_vault_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("usdt-vault"),
-          USDT_MINT.toBuffer(),
-        ],
-        program.programId
-      )
+      // const [usdt_vault_pda] = PublicKey.findProgramAddressSync(
+      //   [
+      //     Buffer.from("usdt-vault"),
+      //     USDT_MINT.toBuffer(),
+      //   ],
+      //   program.programId
+      // )
 
-      const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+      await getOrCreateAssociatedTokenAccount(
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDC_MINT, userWallet, true
       )
 
-      const usdt_associated_token_acc = await getOrCreateAssociatedTokenAccount(
+      await getOrCreateAssociatedTokenAccount(
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDT_MINT, userWallet, true
       )
 
-      const debitAmount = new anchor.BN(transaction.tokenAmount)
-      const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
-      console.log(tokenArgument, debitAmount.toString())
-      creditTx = await program.methods
-        .initiateSwap(tokenArgument, debitAmount, {ghs: {} as never}, {onramp: {}}, `${swaps_count.toNumber()}`)
-        .accounts({
-          admin: admin.publicKey,
-          authority: userWallet,
-          authorityUsdc: usdc_associated_token_acc.address,
-          authorityUsdt: usdt_associated_token_acc.address,
-          userAccount: user_acc_pda,
-          swapAccount: swap_acc_pda,
-          usdc: USDC_MINT,
-          usdt: USDT_MINT,
-          usdcVault: usdc_vault_pda,
-          usdtVault: usdt_vault_pda,
-          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-        })
-        .transaction();
+      // const debitAmount = new anchor.BN(transaction.tokenAmount)
+      // const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
+      // console.log(tokenArgument, debitAmount.toString())
+      // creditTx = await program.methods
+      //   .initiateSwap(tokenArgument, debitAmount, {ghs: {} as never}, {onramp: {}}, `${swaps_count.toNumber()}`)
+      //   .accounts({
+      //     admin: admin.publicKey,
+      //     authority: userWallet,
+      //     authorityUsdc: usdc_associated_token_acc.address,
+      //     authorityUsdt: usdt_associated_token_acc.address,
+      //     userAccount: user_acc_pda,
+      //     swapAccount: swap_acc_pda,
+      //     usdc: USDC_MINT,
+      //     usdt: USDT_MINT,
+      //     usdcVault: usdc_vault_pda,
+      //     usdtVault: usdt_vault_pda,
+      //     clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+      //   })
+      //   .transaction();
 
-      creditTx.feePayer = userWallet;
-      creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
-      creditTx.partialSign(admin)
-      serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
+      // creditTx.feePayer = userWallet;
+      // creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+      // creditTx.partialSign(admin)
+      // serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
 
     } else if (transaction.kind === TRANSACTIONKIND.OFFRAMP) {
       

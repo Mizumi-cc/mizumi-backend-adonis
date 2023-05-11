@@ -25,5 +25,3 @@ export const initiatePayment = async (form: PaymentForm) => {
     .set('api-key', Env.get('FINCRA_SK'))
     .send(form)
 }
-
-
