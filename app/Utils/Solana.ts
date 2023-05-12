@@ -28,10 +28,7 @@ export const getOrCreateAssociatedTokenAccount = async (
   try {
     account = await getAccount(connection, associatedToken)
   } catch (error: any) {
-    console.log(error.name, 'error')
     if (error.name === "TokenAccountNotFoundError" || error.name === "TokenInvalidAccountOwnerError") {
-      console.log(error.name, 'error')
-
       try {
         const transaction = new Transaction().add(
           createAssociatedTokenAccountInstruction(
@@ -44,27 +41,27 @@ export const getOrCreateAssociatedTokenAccount = async (
           )
         );
 
-        transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-        transaction.feePayer = payer.publicKey;
-        transaction.sign(payer);
+        transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+        transaction.feePayer = payer.publicKey
+        transaction.sign(payer)
 
-        const rawTransaction = transaction.serialize();
-        const simulationResult = await connection.simulateTransaction(transaction);
-        console.log(simulationResult, 'simulationResult')
-        await connection.sendRawTransaction(rawTransaction, {skipPreflight: true, preflightCommitment: 'confirmed'});
+        const rawTransaction = transaction.serialize()
+        const signature = await connection.sendRawTransaction(rawTransaction, {skipPreflight: true, preflightCommitment: 'confirmed'})
+        await connection.confirmTransaction(signature, 'confirmed')
+            .catch((err: any) => {
+              console.log(err)
+            })
       } catch (error) {
         
       }
-      account = await getAccount(connection, associatedToken, 'confirmed', TOKEN_PROGRAM_ID);
+      account = await getAccount(connection, associatedToken, 'confirmed', TOKEN_PROGRAM_ID)
 
     } else {
-      console.log(error.name, 'errorss')
-
       throw error;
     }
   }
-  if (!account.mint.equals(mint)) throw new TokenInvalidMintError();
-  if (!account.owner.equals(owner)) throw new TokenInvalidOwnerError();
+  if (!account.mint.equals(mint)) throw new TokenInvalidMintError()
+  if (!account.owner.equals(owner)) throw new TokenInvalidOwnerError()
 
   return account;
 }
