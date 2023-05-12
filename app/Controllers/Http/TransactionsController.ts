@@ -324,11 +324,11 @@ export default class TransactionsController {
       })
     }
 
-    if (transaction.status !== TRANSACTIONSTATUS.DEBITED) {
-      return response.badRequest({
-        error: "Transaction not debited"
-      })
-    }
+    // if (transaction.status !== TRANSACTIONSTATUS.DEBITED) {
+    //   return response.badRequest({
+    //     error: "Transaction not debited"
+    //   })
+    // }
 
     transaction.status = TRANSACTIONSTATUS.SETTLING
     await transaction.save()
