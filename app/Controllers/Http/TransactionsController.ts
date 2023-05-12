@@ -268,7 +268,7 @@ export default class TransactionsController {
         USDT_MINT, userWallet, true
       )
 
-      const debitAmount = new anchor.BN(transaction.tokenAmount * 1e9)
+      const debitAmount = new anchor.BN(transaction.tokenAmount * 1000000000)
       const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
       creditTx = await program.methods
         .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {offramp: {}}, `${swaps_count.toNumber()}`)
@@ -400,7 +400,7 @@ export default class TransactionsController {
         USDT_MINT, userWallet, true
       )
 
-      const creditAmount = new anchor.BN(transaction.tokenAmount * 1e9)
+      const creditAmount = new anchor.BN(transaction.tokenAmount * 1000000000)
       const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
       console.log(tokenArgument, creditAmount.toString())
       creditTx = await program.methods
