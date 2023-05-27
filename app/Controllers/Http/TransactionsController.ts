@@ -641,12 +641,13 @@ export default class TransactionsController {
       if (payload.data && payload.data.status === "success") {
         if (transaction && transaction.status === TRANSACTIONSTATUS.DEBITING) {
           console.log('now debited')
-          transaction.status = TRANSACTIONSTATUS.DEBITED
-          await transaction.save()
           Ws.io.emit('order', {
             id: transaction.id,
             status: 'debited'
           })
+          transaction.status = TRANSACTIONSTATUS.DEBITED
+          await transaction.save()
+          
         }
       } else if (payload.type && payload.type.data.status === "success") {
         if (transaction && transaction.status === TRANSACTIONSTATUS.SETTLING) {
