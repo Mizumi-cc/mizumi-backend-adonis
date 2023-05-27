@@ -14,7 +14,6 @@ class Ws {
     this.io = new Server(AdonisServer.instance!, {
       cors: {
         origin: "*",
-        methods: ["GET", "POST"],
       },
     })
   }
