@@ -80,42 +80,6 @@ export type MizumiProgram = {
       "args": []
     },
     {
-      "name": "firstSwap",
-      "accounts": [
-        {
-          "name": "admin",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "userAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "swapAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "newSwapCount",
-          "type": "string"
-        }
-      ]
-    },
-    {
       "name": "newSwap",
       "accounts": [
         {
@@ -139,11 +103,6 @@ export type MizumiProgram = {
           "isSigner": false
         },
         {
-          "name": "currentSwapAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -151,7 +110,7 @@ export type MizumiProgram = {
       ],
       "args": [
         {
-          "name": "newSwapCount",
+          "name": "swapId",
           "type": "string"
         }
       ]
@@ -244,7 +203,7 @@ export type MizumiProgram = {
           }
         },
         {
-          "name": "swapCount",
+          "name": "swapId",
           "type": "string"
         }
       ]
@@ -288,7 +247,7 @@ export type MizumiProgram = {
           "type": "u64"
         },
         {
-          "name": "swapCount",
+          "name": "swapId",
           "type": "string"
         }
       ]
@@ -296,7 +255,7 @@ export type MizumiProgram = {
   ],
   "accounts": [
     {
-      "name": "swapAccount",
+      "name": "SwapAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -350,7 +309,7 @@ export type MizumiProgram = {
       }
     },
     {
-      "name": "userAccount",
+      "name": "UserAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -528,42 +487,6 @@ export const IDL: MizumiProgram = {
       "args": []
     },
     {
-      "name": "firstSwap",
-      "accounts": [
-        {
-          "name": "admin",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "userAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "swapAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "newSwapCount",
-          "type": "string"
-        }
-      ]
-    },
-    {
       "name": "newSwap",
       "accounts": [
         {
@@ -587,11 +510,6 @@ export const IDL: MizumiProgram = {
           "isSigner": false
         },
         {
-          "name": "currentSwapAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -599,7 +517,7 @@ export const IDL: MizumiProgram = {
       ],
       "args": [
         {
-          "name": "newSwapCount",
+          "name": "swapId",
           "type": "string"
         }
       ]
@@ -692,7 +610,7 @@ export const IDL: MizumiProgram = {
           }
         },
         {
-          "name": "swapCount",
+          "name": "swapId",
           "type": "string"
         }
       ]
@@ -736,7 +654,7 @@ export const IDL: MizumiProgram = {
           "type": "u64"
         },
         {
-          "name": "swapCount",
+          "name": "swapId",
           "type": "string"
         }
       ]
@@ -744,7 +662,7 @@ export const IDL: MizumiProgram = {
   ],
   "accounts": [
     {
-      "name": "swapAccount",
+      "name": "SwapAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -798,7 +716,7 @@ export const IDL: MizumiProgram = {
       }
     },
     {
-      "name": "userAccount",
+      "name": "UserAccount",
       "type": {
         "kind": "struct",
         "fields": [

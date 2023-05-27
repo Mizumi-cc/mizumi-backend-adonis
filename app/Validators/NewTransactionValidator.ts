@@ -31,7 +31,17 @@ export default class NewTransactionValidator {
     fiat: schema.number(),
     kind: schema.number(),
     country: schema.string(),
-    rate: schema.number(),
+    fiatRate: schema.number(),
+    tokenRate: schema.number(),
+    payoutInfo: schema.object().members({
+      method: schema.string(),
+      walletAddress: schema.string.optional(),
+      accountNumber: schema.string.optional(),
+      accountName: schema.string.optional(),
+      momoNumber: schema.string.optional(),
+      momoName: schema.string.optional(),
+      momoNetwork: schema.string.optional(),
+    })
   })
 
   /**

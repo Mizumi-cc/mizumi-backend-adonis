@@ -19,9 +19,6 @@ export default class Transaction extends BaseModel {
   public transactionHash: string;
 
   @column()
-  public fiatTransactionId: string;
-
-  @column()
   public paymentProvider: string;
 
   @column()
@@ -49,7 +46,13 @@ export default class Transaction extends BaseModel {
   public country: string;
 
   @column()
-  public rate: number;
+  public fiatRate: number;
+
+  @column()
+  public tokenRate: number;
+
+  @column()
+  public payoutInfo: any;
 
   @column.dateTime({ autoCreate: true })
   public settledDate: DateTime;

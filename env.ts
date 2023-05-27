@@ -37,5 +37,6 @@ export default Env.rules({
 	FINCRA_SK: Env.schema.string(),
 	FINCRA_WEBHOOK_KEY: Env.schema.string(),
 	FINCRA_API_URL: Env.schema.string(),
+	FINCRA_BUSINESS_ID: Env.schema.string(),
 	CLIENT_URL: Env.schema.string(),
 })

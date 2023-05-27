@@ -13,7 +13,7 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import CreditUserValidator from "App/Validators/CreditUserValidator";
 import CompleteTransactionValidator from "App/Validators/CompleteTransactionValidator";
 import Env from "@ioc:Adonis/Core/Env";
-import { PaymentForm, initiatePayment } from "App/Services/Fincra";
+import { PAYOUTMETHOD, PaymentForm, PayoutForm, initiatePayment, initiatePayout } from "App/Services/Fincra";
 import crypto from "crypto";
 import { getOrCreateAssociatedTokenAccount } from "App/Utils/Solana";
 
@@ -21,7 +21,7 @@ export default class TransactionsController {
   public async create({request, response}: HttpContextContract) {
 
     const payload = await request.validate(NewTransactionValidator) 
-    const { userId, fiatAmount, tokenAmount, token, fiat, kind, country, rate } = payload
+    const { userId, fiatAmount, tokenAmount, token, fiat, kind, country, tokenRate, fiatRate, payoutInfo } = payload
 
     const user = await Auth.find(userId)
 
@@ -47,7 +47,9 @@ export default class TransactionsController {
       fiat,
       kind,
       country,
-      rate,
+      tokenRate,
+      fiatRate,
+      payoutInfo,
       status: TRANSACTIONSTATUS.INITIATED
     })
     const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
@@ -72,64 +74,26 @@ export default class TransactionsController {
     );
  
     let swapAccountTx: anchor.web3.Transaction;
-    
-    const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount;
-    console.log(swaps_count.toNumber(), 'swaps_count')
 
-    if (swaps_count.toNumber() !== 0) {
-      const new_swaps_count = swaps_count.add(new anchor.BN(1));
+    const [swap_acc_pda] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("swap-account"),
+        userWallet.toBuffer(),
+        Buffer.from(`${transaction.id.replace(/-/gi, '')}`),
+      ],
+      program.programId
+    );
 
-      const [current_swap_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("swap-account"),
-          userWallet.toBuffer(),
-          Buffer.from(`${swaps_count.toNumber()}`),
-        ],
-        program.programId
-      );
-
-      const [swap_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("swap-account"),
-          userWallet.toBuffer(),
-          Buffer.from(`${new_swaps_count.toNumber()}`),
-        ],
-        program.programId
-      );
-
-      swapAccountTx = await program.methods
-        .newSwap(`${new_swaps_count.toNumber()}`)
-        .accounts({
-          admin: admin.publicKey,
-          userAccount: user_acc_pda,
-          currentSwapAccount: current_swap_acc_pda,
-          newSwapAccount: swap_acc_pda,
-          authority: userWallet,
-          systemProgram: anchor.web3.SystemProgram.programId,
-        })
-        .transaction();
-    } else {
-      const [swap_acc_pda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("swap-account"),
-          userWallet.toBuffer(),
-          Buffer.from(`${new anchor.BN(1).toNumber()}`),
-        ],
-        program.programId
-      );
-
-      swapAccountTx = await program.methods
-        .firstSwap(`${new anchor.BN(1).toNumber()}`)
-        .accounts({
-          admin: admin.publicKey,
-          userAccount: user_acc_pda,
-          swapAccount: swap_acc_pda,
-          authority: userWallet,
-          systemProgram: anchor.web3.SystemProgram.programId,
-        })
-        .transaction();
-      
-    }
+    swapAccountTx = await program.methods
+      .newSwap(`${transaction.id.replace(/-/gi, '')}`)
+      .accounts({
+        admin: admin.publicKey,
+        userAccount: user_acc_pda,
+        newSwapAccount: swap_acc_pda,
+        authority: userWallet,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .transaction();
     
     swapAccountTx.feePayer = userWallet;
     swapAccountTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
@@ -232,12 +196,11 @@ export default class TransactionsController {
         program.programId
       )
 
-      const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
       const [swap_acc_pda] = PublicKey.findProgramAddressSync(
         [
           Buffer.from("swap-account"),
           userWallet.toBuffer(),
-          Buffer.from(`${swaps_count.toNumber()}`),
+          Buffer.from(`${transaction.id.replace(/-/gi, '')}`),
         ],
         program.programId
       )
@@ -267,11 +230,12 @@ export default class TransactionsController {
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
         USDT_MINT, userWallet, true
       )
+      console.log(transaction.token, `${typeof transaction.token}`)
 
       const debitAmount = new anchor.BN(transaction.tokenAmount * 1000000000)
-      const tokenArgument = transaction.token === STABLES.USDC ? {uSDC: {}} : {uSDT: {}}
+      const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
       creditTx = await program.methods
-        .initiateSwap(tokenArgument, debitAmount, {gHS: {}}, {offramp: {}}, `${swaps_count.toNumber()}`)
+        .initiateSwap(tokenArgument, debitAmount, {ghs: {} as never}, {offramp: {}}, `${transaction.id.replace(/-/gi, '')}`)
         .accounts({
           admin: admin.publicKey,
           authority: userWallet,
@@ -279,6 +243,8 @@ export default class TransactionsController {
           authorityUsdt: usdt_associated_token_acc.address,
           userAccount: user_acc_pda,
           swapAccount: swap_acc_pda,
+          usdc: USDC_MINT,
+          usdt: USDT_MINT,
           usdcVault: usdc_vault_pda,
           usdtVault: usdt_vault_pda,
           clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
@@ -324,26 +290,27 @@ export default class TransactionsController {
       })
     }
 
-    if (transaction.status !== TRANSACTIONSTATUS.DEBITED) {
-      return response.badRequest({
-        error: "Transaction not debited"
-      })
-    }
+    // if (transaction.status !== TRANSACTIONSTATUS.DEBITED) {
+    //   return response.badRequest({
+    //     error: "Transaction not debited"
+    //   })
+    // }
 
     transaction.status = TRANSACTIONSTATUS.SETTLING
     await transaction.save()
 
     const userWallet = new PublicKey(user.walletAddress as string)
 
-    let creditTx: anchor.web3.Transaction;
+    let creditTx: anchor.web3.Transaction
 
     let serializedTransaction: string | null = null
 
     if (transaction.kind === TRANSACTIONKIND.ONRAMP) {
+      const payoutWallet = new PublicKey(transaction.payoutInfo.walletAddress as string)
       const USDC_MINT = new PublicKey(process.env.USDC_MINT as string)
       const USDT_MINT = new PublicKey(process.env.USDT_MINT as string)
     
-      const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
+      const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))))
 
       const connection = new Connection(Env.get('ANCHOR_PROVIDER_URL'))
       const provider = new anchor.AnchorProvider(
@@ -364,12 +331,11 @@ export default class TransactionsController {
         program.programId
       )
 
-      const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
       const [swap_acc_pda] = PublicKey.findProgramAddressSync(
         [
           Buffer.from("swap-account"),
           userWallet.toBuffer(),
-          Buffer.from(`${swaps_count.toNumber()}`),
+          Buffer.from(`${transaction.id.replace(/-/gi, '')}`),
         ],
         program.programId
       )
@@ -392,22 +358,22 @@ export default class TransactionsController {
 
       const usdc_associated_token_acc = await getOrCreateAssociatedTokenAccount(
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
-        USDC_MINT, userWallet, true
+        USDC_MINT, payoutWallet, true
       )
 
       const usdt_associated_token_acc = await getOrCreateAssociatedTokenAccount(
         connection, { secretKey: admin.secretKey, publicKey: admin.publicKey },
-        USDT_MINT, userWallet, true
+        USDT_MINT, payoutWallet, true
       )
 
+      // TODO: change this to 6 decimals for mainnet-beta launch
       const creditAmount = new anchor.BN(transaction.tokenAmount * 1000000000)
       const tokenArgument = transaction.token === STABLES.USDC ? {usdc: {}} as never : {usdt: {}} as never
-      console.log(tokenArgument, creditAmount.toString())
       creditTx = await program.methods
-        .initiateSwap(tokenArgument, creditAmount, {ghs: {} as never}, {onramp: {}}, `${swaps_count.toNumber()}`)
+        .initiateSwap(tokenArgument, creditAmount, {ghs: {} as never}, {onramp: {}}, `${transaction.id.replace(/-/gi, '')}`)
         .accounts({
           admin: admin.publicKey,
-          authority: userWallet,
+          authority: payoutWallet,
           authorityUsdc: usdc_associated_token_acc.address,
           authorityUsdt: usdt_associated_token_acc.address,
           userAccount: user_acc_pda,
@@ -418,15 +384,40 @@ export default class TransactionsController {
           usdtVault: usdt_vault_pda,
           clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
         })
-        .transaction();
+        .transaction()
 
-      creditTx.feePayer = userWallet;
-      creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+      creditTx.feePayer = payoutWallet
+      creditTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash
       creditTx.partialSign(admin)
       serializedTransaction = Buffer.from(creditTx.serialize({ requireAllSignatures: false })).toString('base64')
 
     } else if (transaction.kind === TRANSACTIONKIND.OFFRAMP) {
-      
+      const form: PayoutForm = {
+        business: Env.get('FINCRA_BUSINESS_ID'),
+        sourceCurrency: 'GHS',
+        destinationCurrency: 'GHS',
+        amount: transaction.fiatAmount.toString(),
+        description: 'Payout',
+        paymentDestination: PAYOUTMETHOD.MOBILE_MONEY,
+        customerReference: transaction.id,
+        beneficiary: {
+          firstName: transaction.payoutInfo.momoName.split(' ')[0],
+          lastName: transaction.payoutInfo.momoName.split(' ')[1],
+          accountHolderName: transaction.payoutInfo.momoName,
+          country: 'GH',
+          phone: transaction.payoutInfo.momoNumber,
+          mobileMoneyCode: transaction.payoutInfo.momoNetwork,
+          accountNumber: transaction.payoutInfo.momoNumber,
+          type: 'individual',
+          email: user.email,
+        }
+      }
+      await initiatePayout(form)
+        .catch((err) => {
+          console.log(err, 'err with payout')
+        })
+      transaction.status = TRANSACTIONSTATUS.SETTLED
+      await transaction.save()
     }
 
     return response.json({
@@ -467,7 +458,7 @@ export default class TransactionsController {
 
     const userWallet = new PublicKey(user.walletAddress as string)
 
-    const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
+    const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))))
 
     const provider = new anchor.AnchorProvider(
       new Connection(Env.get('ANCHOR_PROVIDER_URL')),
@@ -487,18 +478,17 @@ export default class TransactionsController {
       program.programId
     )
 
-    const swaps_count = (await program.account.userAccount.fetch(user_acc_pda)).swapsCount
     const [swap_acc_pda] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("swap-account"),
         userWallet.toBuffer(),
-        Buffer.from(`${swaps_count.toNumber()}`),
+        Buffer.from(`${transaction.id.replace(/-/gi, '')}`),
       ],
       program.programId
     )
     
     const tx = await program.methods
-      .completeSwap(true, new anchor.BN(transaction.fiatAmount), `${swaps_count.toNumber()}`)
+      .completeSwap(true, new anchor.BN(transaction.fiatAmount), `${transaction.id.replace(/-/gi, '')}`)
       .accounts({
         admin: admin.publicKey,
         authority: userWallet,
@@ -509,7 +499,7 @@ export default class TransactionsController {
       .transaction();
 
     tx.feePayer = userWallet;
-    tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
+    tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash
     tx.partialSign(admin)
     const serializedTransaction = Buffer.from(tx.serialize({ requireAllSignatures: false })).toString('base64')
 
@@ -537,7 +527,7 @@ export default class TransactionsController {
 
     const userWallet = new PublicKey(user.walletAddress!)
 
-    const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
+    const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))))
 
     const provider = new anchor.AnchorProvider(
       new Connection(Env.get('ANCHOR_PROVIDER_URL')),
@@ -570,7 +560,7 @@ export default class TransactionsController {
       .transaction();
     
     tx.feePayer = userWallet;
-    tx.recentBlockhash = (await provider.connection.getLatestBlockhash({commitment: 'confirmed'})).blockhash;
+    tx.recentBlockhash = (await provider.connection.getLatestBlockhash({commitment: 'confirmed'})).blockhash
     tx.sign({ publicKey: admin.publicKey, secretKey: admin.secretKey })
 
     const serializedTx = Buffer.from(tx.serialize({ requireAllSignatures: false })).toString('base64')
@@ -643,7 +633,7 @@ export default class TransactionsController {
     const encryptedData =  crypto
       .createHmac("SHA512", webhookSecret)
       .update(JSON.stringify(payload)) 
-      .digest("hex");
+      .digest("hex")
     if (encryptedData === webhookSignature) {
       console.log('webhook verified')
       const transaction = await Transaction.find(payload.data.reference)
