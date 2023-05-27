@@ -643,6 +643,7 @@ export default class TransactionsController {
           console.log('now debited')
           Ws.io.emit('order', {
             id: transaction.id,
+            userId: transaction.userId,
             status: 'debited'
           })
           transaction.status = TRANSACTIONSTATUS.DEBITED
