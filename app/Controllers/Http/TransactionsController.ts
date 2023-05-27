@@ -16,6 +16,7 @@ import Env from "@ioc:Adonis/Core/Env";
 import { PAYOUTMETHOD, PaymentForm, PayoutForm, initiatePayment, initiatePayout } from "App/Services/Fincra";
 import crypto from "crypto";
 import { getOrCreateAssociatedTokenAccount } from "App/Utils/Solana";
+import Ws from "App/Services/Ws";
 
 export default class TransactionsController {
   public async create({request, response}: HttpContextContract) {
@@ -642,6 +643,10 @@ export default class TransactionsController {
           console.log('now debited')
           transaction.status = TRANSACTIONSTATUS.DEBITED
           await transaction.save()
+          Ws.io.emit('order', {
+            id: transaction.id,
+            status: 'debited'
+          })
         }
       } else if (payload.type && payload.type.data.status === "success") {
         if (transaction && transaction.status === TRANSACTIONSTATUS.SETTLING) {
