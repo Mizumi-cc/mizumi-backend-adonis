@@ -18,8 +18,47 @@
 |
 */
 
-import Route from '@ioc:Adonis/Core/Route'
+import Route from "@ioc:Adonis/Core/Route";
 
-Route.get('/', async () => {
-  return { hello: 'world' }
+Route.group(() => {
+  Route.post("/order/create", "TransactionsController.create");
+  Route.post("/order/debit", "TransactionsController.debitUser");
+  Route.post("/order/credit", "TransactionsController.creditUser");
+  Route.patch("/order/:id/:userId/:status", "TransactionsController.updateStatus")
+    .where("id", {
+      match: /[0-9]+/,
+    })
+    .where("userId", {
+      match: /[0-9]+/,
+    })
+    .where("status", {
+      match: /[0-9]+/,
+      cast: (status: string) => Number(status)
+    });
+  Route.patch("/wallet-address", "AuthController.saveWalletAddress");
+  Route.get("/order/create-user-program-account-tx/:userId", "TransactionsController.createUserProgramAccountTx")
+    .where("userId", {
+      match: /[0-9]+/,
+    })
+  Route.get("/order/by-user/:userId", "TransactionsController.fetchUserTransactions")
+  Route.post("/order/complete", "TransactionsController.completeTransaction")
 })
+.prefix('/api/v0')
+.middleware('auth:api');
+
+Route.group(() => {
+  Route.post("/register", "AuthController.register");
+  Route.post("/login", "AuthController.login");
+  Route.post("/logout", "AuthController.logout");
+  Route.get("/is-unique", "AuthController.isUniqueUsernameOrEmail");
+})
+.prefix('/auth');
+
+Route.get("/me", "AuthController.me")
+.prefix("/auth")
+.middleware("auth:api");
+
+Route.get("/rates/ghs", "RatesController.getGHSToUSD");
+Route.post("/order/fincra-webhook", "TransactionsController.fincraWebhook");
+Route.get("/order/:id", "TransactionsController.fetchTransaction");
+
