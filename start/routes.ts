@@ -61,4 +61,5 @@ Route.get("/me", "AuthController.me")
 Route.get("/rates/ghs", "RatesController.getGHSToUSD");
 Route.post("/order/fincra-webhook", "TransactionsController.fincraWebhook");
 Route.get("/order/:id", "TransactionsController.fetchTransaction");
+Route.post("/waitlist/join", "WaitlistsController.join").prefix("/api/v0");
 
