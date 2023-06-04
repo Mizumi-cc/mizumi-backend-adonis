@@ -18,3 +18,6 @@ Open [http://localhost:8080](http://localhost:8080) with your browser to see the
 4. Go [here](https://apilayer.com/marketplace/exchangerates_data-api?utm_source=apilayermarketplace&utm_medium=featured) for exchange rate APIs. Use API keys in .env
 5. Mint tokens for USDC and USDT. Use mint addresses in .env file. Make sure they are the same used to initialise Solana program. Instructions [here](https://spl.solana.com/token#example-creating-your-own-fungible-token)
 6. checkout env.example for values for remaining variables.
+
+## Migration
+run `node ace migration:run` 
