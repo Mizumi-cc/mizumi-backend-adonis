@@ -64,5 +64,6 @@ Route.get("/order/:id", "TransactionsController.fetchTransaction");
 Route.group(() => {
   Route.post("/waitlist/join", "WaitlistsController.join").prefix("/api/v0");
   Route.get("/waitlist", "WaitlistsController.getWaitlist").prefix("/api/v0");
+  Route.post("/waitlist/approve", "WaitlistsController.approve").prefix("/api/v0");
 })
 
