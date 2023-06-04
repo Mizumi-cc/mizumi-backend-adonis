@@ -14,6 +14,9 @@ export default class Waitlist extends BaseModel {
   @column()
   public email: string
 
+  @column()
+  public approved: boolean
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

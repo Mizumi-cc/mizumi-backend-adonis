@@ -61,5 +61,9 @@ Route.get("/me", "AuthController.me")
 Route.get("/rates/ghs", "RatesController.getGHSToUSD");
 Route.post("/order/fincra-webhook", "TransactionsController.fincraWebhook");
 Route.get("/order/:id", "TransactionsController.fetchTransaction");
-Route.post("/waitlist/join", "WaitlistsController.join").prefix("/api/v0");
+Route.group(() => {
+  Route.post("/waitlist/join", "WaitlistsController.join").prefix("/api/v0");
+  Route.get("/waitlist", "WaitlistsController.getWaitlist").prefix("/api/v0");
+  Route.post("/waitlist/approve", "WaitlistsController.approve").prefix("/api/v0");
+})
 
