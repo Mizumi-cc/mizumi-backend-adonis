@@ -8,7 +8,7 @@ export default class WaitlistsController {
     const waitlist = await Waitlist.create({ email })
     sgMail.setApiKey(process.env.SENDGRID_API_KEY)
     const msg = {
-      to: email,
+      to: 'timothy@mizumi.cc',
       from: 'support@mizumi.cc',
       subject: 'New Waitlist Signup!',
       text: `${email} has joined the waitlist!`
