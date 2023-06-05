@@ -96,6 +96,7 @@ export default class AuthController {
     console.log(
       'Funded wallet with SOL. Transaction hash: ', solHash
     )
+    await connection.confirmTransaction(solHash)
 
     const usdcTransferInstruction = createTransferInstruction(
       admin_usdc_ata.address,
