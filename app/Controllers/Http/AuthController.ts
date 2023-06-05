@@ -2,10 +2,17 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import RegisterValidator from 'App/Validators/RegisterValidator'
 import WalletAddressValidator from 'App/Validators/WalletAddressValidator'
 import Auth from 'App/Models/Auth'
+import Waitlist from 'App/Models/Waitlist'
 
 export default class AuthController {
   public async register({request, auth, response}: HttpContextContract) {
     const data = await request.validate(RegisterValidator)
+    const waitlistSignup = await Waitlist.findBy('email', data.email)
+    if (!waitlistSignup) {
+      return response.badRequest('You must join the waitlist first')
+    } else if (waitlistSignup.approved === false) {
+      return response.badRequest('You must be approved by the waitlist first')
+    }
     const user = await Auth.create(data)
     const token = await auth.use('api').attempt(data.email, data.password, {
       expiresIn: '10 days'
