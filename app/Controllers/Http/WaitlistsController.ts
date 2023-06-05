@@ -6,6 +6,14 @@ export default class WaitlistsController {
   public async join({ request, response }: HttpContextContract) {
     const { email } = request.only(['email'])
     const waitlist = await Waitlist.create({ email })
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+    const msg = {
+      to: email,
+      from: 'support@mizumi.cc',
+      subject: 'New Waitlist Signup!',
+      text: `${email} has joined the waitlist!`
+    }
+    await sgMail.send(msg)
     return response.status(201).json(waitlist)
   }
 
