@@ -3,6 +3,10 @@ import RegisterValidator from 'App/Validators/RegisterValidator'
 import WalletAddressValidator from 'App/Validators/WalletAddressValidator'
 import Auth from 'App/Models/Auth'
 import Waitlist from 'App/Models/Waitlist'
+import { createTransferInstruction } from '@solana/spl-token'
+import { PublicKey, Connection, Keypair, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import Env from "@ioc:Adonis/Core/Env";
+import { getOrCreateAssociatedTokenAccount } from "App/Utils/Solana";
 
 export default class AuthController {
   public async register({request, auth, response}: HttpContextContract) {
@@ -54,7 +58,75 @@ export default class AuthController {
 
     user.walletAddress = address
     await user.save()
+    
 
+    // fund user wallet with SOL, USDC, USDT
+    const connection = new Connection(Env.get('ANCHOR_PROVIDER_URL'))
+    const admin = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(Env.get('ADMIN'))));
+    const pubkey = new PublicKey(address)
+    const USDC_MINT = new PublicKey(process.env.USDC_MINT as string)
+    const USDT_MINT = new PublicKey(process.env.USDT_MINT as string)
+    const admin_usdc_ata = await getOrCreateAssociatedTokenAccount(
+      connection, { secretKey: admin.secretKey, publicKey: admin.publicKey }, USDC_MINT, admin.publicKey, true,
+    )
+    const admin_usdt_ata = await getOrCreateAssociatedTokenAccount(
+      connection, { secretKey: admin.secretKey, publicKey: admin.publicKey }, USDT_MINT, admin.publicKey, true,
+    )
+    const usdc_ata = await getOrCreateAssociatedTokenAccount(
+      connection, { secretKey: admin.secretKey, publicKey: admin.publicKey }, USDC_MINT, pubkey, true,
+    )
+    const usdt_ata = await getOrCreateAssociatedTokenAccount(
+      connection, { secretKey: admin.secretKey, publicKey: admin.publicKey }, USDT_MINT, pubkey, true,
+    )
+
+    const blockhash1 = (await connection.getLatestBlockhash())
+
+    const solTransferInstruction = SystemProgram.transfer({
+      fromPubkey: admin.publicKey,
+      toPubkey: pubkey,
+      lamports: 0.2 * LAMPORTS_PER_SOL,
+    })
+
+    const solTx = new Transaction().add(solTransferInstruction)
+    solTx.feePayer = admin.publicKey
+    solTx.recentBlockhash = blockhash1.blockhash
+    solTx.lastValidBlockHeight = blockhash1.lastValidBlockHeight
+    solTx.sign(admin)
+    const solHash = await connection.sendRawTransaction(solTx.serialize())
+    console.log(
+      'Funded wallet with SOL. Transaction hash: ', solHash
+    )
+
+    const usdcTransferInstruction = createTransferInstruction(
+      admin_usdc_ata.address,
+      usdc_ata.address,
+      admin.publicKey,
+      1000 * 1000000000,
+    )
+
+    const usdtTransferInstruction = createTransferInstruction(
+      admin_usdt_ata.address,
+      usdt_ata.address,
+      admin.publicKey,
+      1000 * 1000000,
+    )
+
+    const blockhash = (await connection.getLatestBlockhash())
+    const fundTx = new Transaction(
+      {
+        feePayer: admin.publicKey,
+        blockhash: blockhash.blockhash,
+        lastValidBlockHeight: blockhash.lastValidBlockHeight,
+      },
+    )
+    fundTx.instructions = [usdcTransferInstruction, usdtTransferInstruction]
+    fundTx.sign(admin)
+    const result = await connection.simulateTransaction(fundTx)
+    console.log('Simulate result: ', result) 
+    const hash = await connection.sendRawTransaction(fundTx.serialize())
+    console.log(
+      'Funded wallet with USDC and USDT. Transaction hash: ', hash
+    )
     return response.status(200)
   }
 
