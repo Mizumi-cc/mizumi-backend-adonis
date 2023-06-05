@@ -108,7 +108,7 @@ export default class AuthController {
       admin_usdt_ata.address,
       usdt_ata.address,
       admin.publicKey,
-      1000 * 1000000,
+      1000 * 1000000000,
     )
 
     const blockhash = (await connection.getLatestBlockhash())
