@@ -39,4 +39,5 @@ export default Env.rules({
 	FINCRA_API_URL: Env.schema.string(),
 	FINCRA_BUSINESS_ID: Env.schema.string(),
 	CLIENT_URL: Env.schema.string(),
+	SENDGRID_API_KEY: Env.schema.string(),
 })
