@@ -74,7 +74,7 @@ export default class TransactionsController {
       program.programId
     );
  
-    let swapAccountTx: anchor.web3.Transaction;
+    let swapAccountTx: anchor.web3.Transaction = new anchor.web3.Transaction();
 
     const [swap_acc_pda] = PublicKey.findProgramAddressSync(
       [
@@ -85,7 +85,26 @@ export default class TransactionsController {
       program.programId
     );
 
-    swapAccountTx = await program.methods
+    let createUserAccountIx: anchor.web3.TransactionInstruction;
+
+    try {
+      // check for program user account
+      // @ts-ignore
+      await program.account.userAccount.fetch(user_acc_pda)
+    } catch (error) {
+      createUserAccountIx = await program.methods 
+        .newUser()
+        .accounts({
+          admin: admin.publicKey,
+          userAccount: user_acc_pda,
+          authority: userWallet,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .instruction();
+      swapAccountTx.instructions.push(createUserAccountIx)
+    }
+
+    const swapIx = await program.methods
       .newSwap(`${transaction.id.replace(/-/gi, '')}`)
       .accounts({
         admin: admin.publicKey,
@@ -94,12 +113,13 @@ export default class TransactionsController {
         authority: userWallet,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
-      .transaction();
+      .instruction();
     
+    swapAccountTx.instructions.push(swapIx)
     swapAccountTx.feePayer = userWallet;
     swapAccountTx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash;
     swapAccountTx.sign({ publicKey: admin.publicKey, secretKey: admin.secretKey })
-
+    
     const serializedTx = Buffer.from(swapAccountTx.serialize({ requireAllSignatures: false })).toString('base64')
     return response.json({
       serializedTransaction: serializedTx,
