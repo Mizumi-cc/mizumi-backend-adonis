@@ -1,12 +1,15 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import RegisterValidator from 'App/Validators/RegisterValidator'
 import WalletAddressValidator from 'App/Validators/WalletAddressValidator'
+import ChangePasswordValidator from 'App/Validators/ChangePasswordValidator'
 import Auth from 'App/Models/Auth'
 import Waitlist from 'App/Models/Waitlist'
 import { createTransferInstruction } from '@solana/spl-token'
 import { PublicKey, Connection, Keypair, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import Env from "@ioc:Adonis/Core/Env";
 import { getOrCreateAssociatedTokenAccount } from "App/Utils/Solana";
+import Hash from "@ioc:Adonis/Core/Hash"
+import UpdateProfileValidator from 'App/Validators/UpdateProfileValidator'
 
 export default class AuthController {
   public async register({request, auth, response}: HttpContextContract) {
@@ -145,5 +148,47 @@ export default class AuthController {
     } else {
       return response.status(200).json({ isUnique: true })
     }
+  }
+
+  public async changePassword({request, auth, response}: HttpContextContract) {
+    const { oldPassword, newPassword } = await request.validate(ChangePasswordValidator)
+    await auth.use('api').authenticate()
+    const user = auth.use('api').user
+
+    if(!user) {
+      return response.status(401)
+    }
+
+    const isSame = await Hash.verify(user.password, oldPassword)
+
+    if (!isSame) {
+      return response.badRequest('Invalid credentials')
+    }
+
+    user.password = newPassword
+    await user.save()
+
+    return response.status(200)
+  }
+
+  public async updateProfile({request, auth, response}: HttpContextContract) {
+    const payload = await request.validate(UpdateProfileValidator)
+    await auth.use('api').authenticate()
+      .catch((e) => {
+        response.status(500).json({ e })
+      })
+    const user = auth.use('api').user
+    
+    if (!user) {
+      response.status(401)
+    }
+
+    const keys = Object.keys(payload)
+    for (const iterator of keys) {
+      user![iterator] = payload[iterator]
+    }
+
+    await user?.save()
+    response.status(200)
   }
 }

@@ -51,6 +51,8 @@ Route.group(() => {
   Route.post("/login", "AuthController.login");
   Route.post("/logout", "AuthController.logout");
   Route.get("/is-unique", "AuthController.isUniqueUsernameOrEmail");
+  Route.patch("/change-password", "AuthController.changePassword");
+  Route.patch("/update-profile", "AuthController.updateProfile");
 })
 .prefix('/auth');
 
