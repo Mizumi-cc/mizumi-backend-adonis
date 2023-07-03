@@ -10,6 +10,9 @@ import Env from "@ioc:Adonis/Core/Env";
 import { getOrCreateAssociatedTokenAccount } from "App/Utils/Solana";
 import Hash from "@ioc:Adonis/Core/Hash"
 import UpdateProfileValidator from 'App/Validators/UpdateProfileValidator'
+import TwoFactorAuthProvider from 'App/Services/TwoFactorAuthProvider'
+import TwoFactorChallengeValidator from 'App/Validators/TwoFactorChallengeValidator'
+const twoFactor = require('node-2fa')
 
 export default class AuthController {
   public async register({request, auth, response}: HttpContextContract) {
@@ -33,16 +36,19 @@ export default class AuthController {
     const username = request.input('username')
     
     try {
-      const token= await auth.use('api').attempt(email ? email : username, password, {
-        expiresIn: '10 days'
-      })
-
-      const user = await Auth.findBy(`${email ? 'email' : 'username'}`, email ? email : username)
-      return response.status(200).json({ token, user })
+      const user = await auth.use('api').verifyCredentials(email ? email : username, password)
+      console.log(user.twoFactorSecret)
+      if (user.isTwoFactorEnabled) {
+        return response.status(200).json({ twoFactorRequired: true })
+      } else {
+        const token = await auth.use('api').generate(user!, {
+          expiresIn: '10 days'
+        })
+        return response.status(200).json({ token, user: user, twoFactorRequired: false, twoFactorEnabled: false })
+      }
     } catch (error) {
-      return response.badRequest('Invalid credentials')
+      return response.unauthorized('Invalid credentials')
     }
-    
   }
 
   public async logout({auth, response}: HttpContextContract) {
@@ -136,7 +142,7 @@ export default class AuthController {
 
   public async me({auth, response}: HttpContextContract) {
     const user = auth.user
-    return response.status(200).json({ user })
+    return response.status(200).json({ user: user, twoFactorEnabled: user?.isTwoFactorEnabled })
   }
 
   public async isUniqueUsernameOrEmail({request, response}: HttpContextContract) {
@@ -191,4 +197,120 @@ export default class AuthController {
     await user?.save()
     response.status(200)
   }
+
+  public async enableTwoFactorAuth({ auth, response }: HttpContextContract) {
+    await auth.use('api').authenticate()
+    const user = auth.use('api').user
+    
+    if (!user) {
+      return response.status(401)
+    }
+
+    user.twoFactorSecret = await TwoFactorAuthProvider.generateSecret(user)
+    user.twoFactorRecoveryCodes = await TwoFactorAuthProvider.generateRecoveryCodes()
+    await user.save()
+
+    response.status(200).json({
+      status: {
+        type: 'success',
+        message: 'Two factor authentication enabled',
+      },
+      code: await TwoFactorAuthProvider.generateQrCode(user),
+    })
+  }
+
+  public async disableTwoFactorAuth({ auth, response }: HttpContextContract) {
+    await auth.use('api').authenticate()
+    const user = auth.use('api').user
+
+    if (!user) {
+      return response.status(401)
+    }
+
+    user.twoFactorSecret = undefined
+    user.twoFactorRecoveryCodes = undefined
+    await user.save()
+
+    response.status(200).json({
+      status: {
+        type: 'success',
+        message: 'Two factor authentication disabled',
+      },
+    })
+  }
+
+  public async fetchRecoveryCodes({ auth, response }: HttpContextContract) {
+    await auth.use('api').authenticate()
+    const user = auth.use('api').user
+
+    if (!user) {
+      return response.status(401)
+    }
+
+    if (!user.twoFactorRecoveryCodes) {
+      return response.status(400).json({
+        status: {
+          type: 'error',
+          message: 'No recovery codes available',
+        },
+      })
+    }
+
+    response.status(200).json({
+      twoFactorEnabled: user.isTwoFactorEnabled,
+      recoveryCodes: user.twoFactorRecoveryCodes,
+    })
+  }
+
+  public async twoFactorChallenge({ request, auth, response }: HttpContextContract) {
+    const { code, recoveryCode, id } = await request.validate(TwoFactorChallengeValidator)
+
+
+    const user = await Auth.query().where(`${id.includes('@') ? 'email' : 'username'}`, id).first()
+    if (!user || !user.twoFactorSecret) {
+      return response.status(401).json({
+        message: 'Two factor authentication failed. Invalid user.'
+      })
+    }
+
+    if (code) {
+      const isValid = twoFactor.verifyToken(user.twoFactorSecret, code)
+      if (isValid) {
+        const token = await auth.use('api').generate(user, {
+          expiresIn: '10 days'
+        })
+        return response.status(200).json({
+          message: 'Two factor authentication successful.',
+          token,
+          user: user,
+          twoFactorEnabled: true
+        })
+      } else {
+        return response.status(401).json({
+          message: 'Two factor authentication failed. Invalid code.'
+        })
+      }
+    } else if (recoveryCode) {
+      const codes = user?.twoFactorRecoveryCodes ?? []
+      if (codes.includes(recoveryCode)) {
+        user.twoFactorRecoveryCodes = codes.filter((c) => c !== recoveryCode)
+        await user.save()
+        const token = await auth.use('api').generate(user, {
+          expiresIn: '10 days'
+        })
+        return response.status(200).json({
+          message: 'Two factor authentication successful.',
+          token,
+          user: user,
+          twoFactorEnabled: true
+        })
+      } else {
+        return response.status(401).json({
+          message: 'Two factor authentication failed. Invalid recovery code.'
+        })
+      }
+    }
+  }
 }
+
+
