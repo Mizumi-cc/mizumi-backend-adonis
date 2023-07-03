@@ -53,6 +53,10 @@ Route.group(() => {
   Route.get("/is-unique", "AuthController.isUniqueUsernameOrEmail");
   Route.patch("/change-password", "AuthController.changePassword");
   Route.patch("/update-profile", "AuthController.updateProfile");
+  Route.get("/enable-2fa", "AuthController.enableTwoFactorAuth");
+  Route.get("/disable-2fa", "AuthController.disableTwoFactorAuth");
+  Route.post("/2fa-challenge", "AuthController.twoFactorChallenge");
+  Route.get("/2fa-recovery-codes", "AuthController.fetchRecoveryCodes");
 })
 .prefix('/auth');
 
