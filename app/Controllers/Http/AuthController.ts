@@ -37,7 +37,6 @@ export default class AuthController {
     
     try {
       const user = await auth.use('api').verifyCredentials(email ? email : username, password)
-      console.log(user.twoFactorSecret)
       if (user.isTwoFactorEnabled) {
         return response.status(200).json({ twoFactorRequired: true })
       } else {
@@ -47,6 +46,7 @@ export default class AuthController {
         return response.status(200).json({ token, user: user, twoFactorRequired: false, twoFactorEnabled: false })
       }
     } catch (error) {
+      console.log(error)
       return response.unauthorized('Invalid credentials')
     }
   }
