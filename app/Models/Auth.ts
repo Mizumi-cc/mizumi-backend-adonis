@@ -56,6 +56,7 @@ export default class Auth extends BaseModel {
   }
 
   public get isTwoFactorEnabled() {
+    if (!this.twoFactorSecret) return false
     if (Object.keys(this.twoFactorSecret!).length === 0) return false
     return Boolean(this?.twoFactorSecret)
   }
