@@ -47,6 +47,7 @@ export default class AuthController {
         return response.status(200).json({ token, user: user, twoFactorRequired: false, twoFactorEnabled: false })
       }
     } catch (error) {
+      console.log(error)
       return response.unauthorized('Invalid credentials')
     }
   }
