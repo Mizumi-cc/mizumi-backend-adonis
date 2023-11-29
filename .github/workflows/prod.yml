@@ -36,7 +36,7 @@ jobs:
       uses: parkingboss/slackbot-postmessage@v1.2.0
       with:
         token: ${{ secrets.SLACK_SECRET }}
-        request: '{"channel": "C067T5CVDQA", "text": "Prod deployment completed successfully 🚀"}'
+        request: '{"channel": "C04UDTR41LJ", "text": "Prod deployment completed successfully 🚀"}'
 
   notify-failure:
     runs-on: ubuntu-latest
@@ -47,4 +47,4 @@ jobs:
       uses: parkingboss/slackbot-postmessage@v1.2.0
       with:
         token: ${{ secrets.SLACK_SECRET }}
-        request: '{"channel": "C067T5CVDQA", "text": "Prod deployment failed 😞"}'
+        request: '{"channel": "C04UDTR41LJ", "text": "Prod deployment failed 😞"}'
