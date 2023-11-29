@@ -1,0 +1,18 @@
+slack_notification:
+    needs: [first-job, second-job]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codee
+        uses: actions/checkout@v3
+      - name: Run Slack Notification
+        uses: rohammosalli/slack-action@master
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_SECRET }}
+          SLACK_CHANNEL: "deployments"
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          RUN_ID: ${{ github.run_id }}
+          SEND_SUCCESS_MESSAGE: "true"
