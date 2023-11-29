@@ -23,6 +23,7 @@ jobs:
           git status
           yarn install
           yarn build
+          cp .env build/.env
           cd build
           yarn install --production
           pm2 restart server
