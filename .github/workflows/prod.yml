@@ -24,6 +24,7 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 22
         script: |
+          exec bash \-l
           cd ~/mizumi/backend
           git pull origin main
           git status
