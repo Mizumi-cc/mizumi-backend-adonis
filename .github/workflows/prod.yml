@@ -17,16 +17,7 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 22
         script: |
-          exec bash \-l
-          cd ~/mizumi/backend
-          git pull origin main
-          git status
-          yarn install
-          yarn build
-          cp .env build/.env
-          cd build
-          yarn install --production
-          pm2 restart server
+          ./deploy-prod.sh
 
   notify-success:
     runs-on: ubuntu-latest
