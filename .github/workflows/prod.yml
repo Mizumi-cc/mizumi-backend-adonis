@@ -33,7 +33,7 @@ jobs:
     needs: build
     steps:
     - name: Send success alert to slack workspace
-      uses: parkingboss/slackbot-postmessage@v1
+      uses: parkingboss/slackbot-postmessage@v1.2.0
       with:
         token: ${{ secrets.SLACK_SECRET }}
         request: '{"channel": "C067T5CVDQA", "text": "Prod deployment completed successfully 🚀"}'
@@ -44,7 +44,7 @@ jobs:
     needs: build
     steps:
     - name: Send failure alert to slack workspace
-      uses: parkingboss/slackbot-postmessage@v1
+      uses: parkingboss/slackbot-postmessage@v1.2.0
       with:
         token: ${{ secrets.SLACK_SECRET }}
         request: '{"channel": "C067T5CVDQA", "text": "Prod deployment failed 😞"}'
